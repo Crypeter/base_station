@@ -58,6 +58,18 @@ build CMakeFiles/base_station.dir/BaseMap.cpp.o: CXX_COMPILER__base_station_Debu
   OBJECT_DIR = CMakeFiles/base_station.dir
   OBJECT_FILE_DIR = CMakeFiles/base_station.dir
 
+build CMakeFiles/base_station.dir/UnitTest.cpp.o: CXX_COMPILER__base_station_Debug /Users/zfyang/Documents/文件/base_station/UnitTest.cpp || cmake_object_order_depends_target_base_station
+  DEP_FILE = CMakeFiles/base_station.dir/UnitTest.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk
+  OBJECT_DIR = CMakeFiles/base_station.dir
+  OBJECT_FILE_DIR = CMakeFiles/base_station.dir
+
+build CMakeFiles/base_station.dir/terminal.cpp.o: CXX_COMPILER__base_station_Debug /Users/zfyang/Documents/文件/base_station/terminal.cpp || cmake_object_order_depends_target_base_station
+  DEP_FILE = CMakeFiles/base_station.dir/terminal.cpp.o.d
+  FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk
+  OBJECT_DIR = CMakeFiles/base_station.dir
+  OBJECT_FILE_DIR = CMakeFiles/base_station.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target base_station
@@ -66,7 +78,7 @@ build CMakeFiles/base_station.dir/BaseMap.cpp.o: CXX_COMPILER__base_station_Debu
 #############################################
 # Link the executable base_station
 
-build base_station: CXX_EXECUTABLE_LINKER__base_station_Debug CMakeFiles/base_station.dir/main.cpp.o CMakeFiles/base_station.dir/BaseMap.cpp.o
+build base_station: CXX_EXECUTABLE_LINKER__base_station_Debug CMakeFiles/base_station.dir/main.cpp.o CMakeFiles/base_station.dir/BaseMap.cpp.o CMakeFiles/base_station.dir/UnitTest.cpp.o CMakeFiles/base_station.dir/terminal.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.1.sdk
   OBJECT_DIR = CMakeFiles/base_station.dir
   POST_BUILD = :

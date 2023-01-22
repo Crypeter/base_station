@@ -8,6 +8,7 @@
 #include <string>
 #include <stdio.h>
 #include <cmath>
+#define MaxStore 100
 using namespace std;
 double distance(double x1,double x2,double y1,double y2);//计算点与点之间点欧式几何距离
 class Node{
@@ -47,6 +48,7 @@ private:
     void put(Node *now,double XPoint, double YPoint, int range, double power, int number);//向树中加入节点的辅助方法
     Node* nearest(Node *now,double XPoint,double YPoint,Node *best);//寻找最近节点的辅助方法
     void nearestN(Node *now,double XPoint,double YPoint,Deque& best);//寻找n个节点的辅助方法 结果存储在best这个队列中
+    void rangeSearch(Node *now,double XPoint1,double YPoint1,double XPoint2,double YPoint2,int &number,Deque &store);//搜索矩形范围内的节点
 public:
     KDTree(){root = NULL;};
     void put(double XPoint,double YPoint,int range,double power,int number);//向树中加入节点
@@ -64,6 +66,6 @@ public:
     void put(double XPoint,double YPoint,char *space,double power,int number);//向图中加入节点
     Node* BaseStationSearch(double XPoint,double YPoint);//寻找离某个点信号最好的基站
     Deque NBaseStationSearch(double  XPoint,double YPoint,int n,string name);//寻找某个种类的n个基站
-    Deque RangeSearch(double XPoint1,double YPoint1,double XPoint2,double YPoint2,int &number);//搜索矩形范围内的基站
+    Deque RangeSearch(double XPoint1,double YPoint1,double XPoint2,double YPoint2,int &number);//搜索矩形范围内的基站,number存储返回的个数
 };
 #endif //BASE_STATION_BASEMAP_H

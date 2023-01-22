@@ -202,6 +202,47 @@ Deque KDTree::NearNPointSearch(double XPoint, double YPoint, int n) {
     nearestN(root,XPoint,YPoint,store);
     return store;
 }
+
+void KDTree::RangeSearch(double MaxXPoint, double MaxYPoint, double MinXPoint, double MinYPoint, int &number, Deque &store) {
+    rangeSearch(root,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+}
+
+void KDTree::rangeSearch(Node *now, double MaxXPoint, double MaxYPoint, double MinXPoint, double MinYPoint, int &number,Deque &store) {
+    if(now == NULL)return;
+    if(now->vector == 0){
+        if(now->XPoint <= MaxXPoint && now->XPoint >= MinXPoint ){
+            if(now->YPoint <= MaxYPoint && now->YPoint >=MinYPoint) {
+                store.add(now);
+                number++;
+            }
+            rangeSearch(now->lChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+            rangeSearch(now->rChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+        }
+        else if(now->XPoint > MaxXPoint){
+            rangeSearch(now->lChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+        }
+        else if(now->XPoint < MinXPoint){
+            rangeSearch(now->rChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+        }
+    }
+    else if(now->vector == 1){
+        if(now->YPoint <= MaxYPoint && now->YPoint >= MinYPoint ){
+            if(now->XPoint <= MaxXPoint && now->XPoint >=MinXPoint) {
+                store.add(now);
+                number++;
+            }
+            rangeSearch(now->lChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+            rangeSearch(now->rChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+        }
+        else if(now->YPoint > MaxYPoint){
+            rangeSearch(now->lChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+        }
+        else if(now->YPoint < MinYPoint){
+            rangeSearch(now->rChild,MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+        }
+    }
+}
+
 BaseStationMap::BaseStationMap(std::string filename) {
     ifstream file_jz001;
     this->town = new KDTree();
@@ -291,4 +332,39 @@ Node *BaseStationMap::BaseStationSearch(double XPoint, double YPoint) {
     if(powerT > powerV && powerT > powerF)return t;
     if(powerV > powerT && powerV > powerF)return v;
     if(powerF > powerV && powerF > powerT)return f;
+}
+
+Deque BaseStationMap::NBaseStationSearch(double XPoint, double YPoint, int n, string name) {
+    if(strcmp(name.c_str(),"城区") == 0)return town->NearNPointSearch(XPoint,YPoint,n);
+    if(strcmp(name.c_str(),"乡镇") == 0)return village->NearNPointSearch(XPoint,YPoint,n);
+    if(strcmp(name.c_str(),"高速") == 0)return fastRoad->NearNPointSearch(XPoint,YPoint,n);
+}
+
+Deque BaseStationMap::RangeSearch(double XPoint1, double YPoint1, double XPoint2, double YPoint2, int &number) {
+    if(XPoint1 == XPoint2)throw uncaught_exception();
+    if(YPoint1 == YPoint2)throw uncaught_exception();
+    Deque store(MaxStore);//设置存储最大上限为100
+    double MaxXPoint,MaxYPoint,MinXPoint,MinYPoint;
+    if(XPoint1 > XPoint2){
+        MaxXPoint = XPoint1;
+        MinXPoint = XPoint2;
+    }
+    else{
+        MaxXPoint = XPoint2;
+        MinXPoint = XPoint1;
+    }
+    if(YPoint1 > YPoint2){
+        MaxYPoint = YPoint1;
+        MinYPoint = YPoint2;
+    }
+    else{
+        MaxYPoint = YPoint2;
+        MinYPoint = YPoint1;
+    }
+    town->RangeSearch(MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+    village->RangeSearch(MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+    fastRoad->RangeSearch(MaxXPoint,MaxYPoint,MinXPoint,MinYPoint,number,store);
+    cout<<"矩形内的点有"<<number<<"个"<<endl;
+    store.printAll();
+    return store;
 }
