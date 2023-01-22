@@ -1,0 +1,3 @@
+/Users/zfyang/Documents/文件/base_station/cmake-build-debug/CMakeFiles/base_station.dir
+/Users/zfyang/Documents/文件/base_station/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/zfyang/Documents/文件/base_station/cmake-build-debug/CMakeFiles/rebuild_cache.dir
