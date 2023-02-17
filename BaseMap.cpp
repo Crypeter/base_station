@@ -7,7 +7,7 @@ double distance(double x1,double y1,double x2,double y2){
     return pow(x1-x2,2)+pow(y1-y2,2);
 }
 
-Node::Node(double XPoint, double YPoint, int range, double power, int number, int vector) {
+Node::Node(double XPoint, double YPoint, int range, double power, int number, int vector,Node* father) {
         this->XPoint = XPoint;
         this->YPoint = YPoint;
         this->range = range;
@@ -16,6 +16,14 @@ Node::Node(double XPoint, double YPoint, int range, double power, int number, in
         this->vector = vector;
         this->lChild = NULL;
         this->rChild = NULL;
+        this->father = father;
+}
+
+void Node::show() {
+    cout<<"位于（"<<XPoint<<","<<YPoint<<")"<<"的点";
+    cout<<" 范围为"<<range*power;
+    cout<<" 强度为"<<power;
+    cout<<" 编号为"<<number<<endl;
 }
 
 LinkNode *LinkNode::LinkNodeMake(Node *value, LinkNode *before) {
@@ -68,7 +76,7 @@ void Deque::printAll() {
     int i = length;
     while(i!=0){
         if(p->value !=NULL){
-            cout<<p->value->XPoint<<","<<p->value->YPoint<<endl;
+            p->value->show();
         }
         p=p->next;
         i--;
@@ -86,21 +94,21 @@ Node* Deque::getNow() {
 void KDTree::put(Node *now, double XPoint, double YPoint, int range, double power, int number) {
     if(now->vector == 0){//此处为x轴分化
         if(XPoint > now->XPoint){//大于进入右子树
-            if(now->rChild == NULL)now->rChild = new Node(XPoint,YPoint,range,power,number,1);
+            if(now->rChild == NULL)now->rChild = new Node(XPoint,YPoint,range,power,number,1,now);
             else put(now->rChild,XPoint,YPoint,range,power,number);
         }
         else {//小于进入左子树
-            if(now->lChild == NULL)now->lChild = new Node(XPoint,YPoint,range,power,number,1);
+            if(now->lChild == NULL)now->lChild = new Node(XPoint,YPoint,range,power,number,1,now);
             else put(now->lChild,XPoint,YPoint,range,power,number);
         }
     }
     else{//此处为y轴划分
         if(YPoint > now->YPoint){//大于则进入右子树
-            if(now->rChild == NULL)now->rChild = new Node(XPoint,YPoint,range,power,number,0);
+            if(now->rChild == NULL)now->rChild = new Node(XPoint,YPoint,range,power,number,0,now);
             else put(now->rChild,XPoint,YPoint,range,power,number);
         }
         else {//小于进入左子树
-            if(now->lChild == NULL)now->lChild = new Node(XPoint,YPoint,range,power,number,0);
+            if(now->lChild == NULL)now->lChild = new Node(XPoint,YPoint,range,power,number,0,now);
             else put(now->lChild,XPoint,YPoint,range,power,number);
         }
     }
@@ -108,7 +116,7 @@ void KDTree::put(Node *now, double XPoint, double YPoint, int range, double powe
 
 void KDTree::put(double XPoint, double YPoint, int range, double power, int number) {
     if(root == NULL){
-        root = new Node(XPoint,YPoint,range,power,number,0);
+        root = new Node(XPoint,YPoint,range,power,number,0,NULL);
     }
     else put(root,XPoint,YPoint,range,power,number);
     return;
@@ -243,6 +251,10 @@ void KDTree::rangeSearch(Node *now, double MaxXPoint, double MaxYPoint, double M
     }
 }
 
+Node *KDTree::getRoot() {
+    return root;
+}
+
 BaseStationMap::BaseStationMap(std::string filename) {
     ifstream file_jz001;
     this->town = new KDTree();
@@ -325,9 +337,9 @@ Node *BaseStationMap::BaseStationSearch(double XPoint, double YPoint) {
         distanceF = pow(XPoint-f->XPoint,2)+ pow(YPoint-f->YPoint,2);
         powerF = f->power* pow(f->range,2)/distanceF;//计算离高速最近基站距离，distanceF = (x3-x0)^2+(y3-y0)^2
     }
-    if(powerT < 1)powerT = 0;
-    if(powerF < 1)powerF = 0;
-    if(powerV < 1)powerV = 0;//超出信号范围无信号
+    //if(powerT < 1)powerT = 0;
+    //if(powerF < 1)powerF = 0;
+    //if(powerV < 1)powerV = 0;//超出信号范围无信号
     if(powerT == 0 && powerF == 0 && powerV == 0)return NULL;
     if(powerT > powerV && powerT > powerF)return t;
     if(powerV > powerT && powerV > powerF)return v;
@@ -367,4 +379,13 @@ Deque BaseStationMap::RangeSearch(double XPoint1, double YPoint1, double XPoint2
     cout<<"矩形内的点有"<<number<<"个"<<endl;
     store.printAll();
     return store;
+}
+
+KDTree *BaseStationMap::getKDTree(int n) {
+    switch (n) {
+        case 0:return town;
+        case 1:return village;
+        case 2:return fastRoad;
+    }
+    return NULL;
 }

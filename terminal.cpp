@@ -3,7 +3,7 @@
 //
 
 #include "terminal.h"
-
+#define 精度 300
 void Time::change(int hour,double minute) {
     if(minute>=60){
         this->minute = (int)minute%60;
@@ -54,7 +54,7 @@ void terminal::change(int tick) {
     place = 0;
 }
 
-terminal::terminal():StartXPoint(0),StartYPoint(0),EndXPoint(0),EndYPoint(0),Speed(0),now(0,0),Start(0,0),MaxTick(100),place(0){
+terminal::terminal():StartXPoint(0),StartYPoint(0),EndXPoint(0),EndYPoint(0),Speed(0),now(0,0),Start(0,0),MaxTick(精度),place(0){
 }
 
 

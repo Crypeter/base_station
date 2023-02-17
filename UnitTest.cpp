@@ -3,7 +3,7 @@
 //
 #include "BaseMap.h"
 void DequeTest(){
-    Node a(1,2,3,4,5,0),b(2,3,4,5,6,7),c(3,4,5,6,7,0),d(4,5,6,7,8,0);
+    Node a(1,2,3,4,5,0,NULL),b(2,3,4,5,6,7,NULL),c(3,4,5,6,7,0,NULL),d(4,5,6,7,8,0,NULL);
     Deque test(3);
     //Node *aa =test.getNow();
     //cout<<aa->XPoint<<","<<aa->YPoint<<endl;

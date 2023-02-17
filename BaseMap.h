@@ -21,7 +21,9 @@ public:
     int vector;//维度,0表示左右儿子为x轴分割,1表示左右儿子为y轴分割
     Node *lChild;//小于的儿子
     Node *rChild;//大于的儿子
-    Node(double XPoint,double YPoint,int range,double power,int number,int vector);
+    Node *father;//父亲节点
+    Node(double XPoint,double YPoint,int range,double power,int number,int vector,Node* father);
+    void show();//显示该节点内的信息
 };
 class LinkNode{
 public:
@@ -51,16 +53,19 @@ private:
     void rangeSearch(Node *now,double XPoint1,double YPoint1,double XPoint2,double YPoint2,int &number,Deque &store);//搜索矩形范围内的节点
 public:
     KDTree(){root = NULL;};
+    Node *getRoot();
     void put(double XPoint,double YPoint,int range,double power,int number);//向树中加入节点
     Node* NearPointSearch(double  XPoint,double YPoint);//寻找一个节点的最近节点
     Deque NearNPointSearch(double  XPoint,double YPoint,int n);//寻找最近的n个节点
     void RangeSearch(double XPoint1,double YPoint1,double XPoint2,double YPoint2,int &number,Deque &store);//搜索矩形范围内的节点
 };
 class BaseStationMap{
-public:
+private:
     KDTree *town;//存储城区基站信息
     KDTree *village;//存储乡镇基站信息
     KDTree *fastRoad;//存储高速基站信息
+public:
+    KDTree *getKDTree(int n);
     BaseStationMap(string filename);
     void readfile(string filename);
     void put(double XPoint,double YPoint,char *space,double power,int number);//向图中加入节点
