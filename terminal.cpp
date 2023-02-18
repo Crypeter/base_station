@@ -3,7 +3,7 @@
 //
 
 #include "terminal.h"
-#define 精度 300
+#define 精度 100
 void Time::change(int hour,double minute) {
     if(minute>=60){
         this->minute = (int)minute%60;
@@ -104,6 +104,21 @@ terminal &System::operator[](int a) {
 void System::printAll() {
     for (int i = 0; i < number; ++i) {
         cout<<group[i].StartXPoint<<","<<group[i].StartYPoint<<endl;
+    }
+}
+void System::run(BaseStationMap &map,int degree) {
+    for(int i=0;i<number;i++){
+        cout<<"第"<<i<<"个终端的情况"<<endl;
+        group[i].MaxTick = degree;
+        for(int j=0;j<group[i].MaxTick;j++){
+            Node *p=group[i].connectTick(map);
+            if(p == NULL)
+                cout<<"此时没有信号"<<endl;
+            else{
+                cout<<"连接到位于("<<p->XPoint<<","<<p->YPoint<<")的编号为"<<p->number<<"的基站"<<endl;
+            }
+        }
+        cout<<endl;
     }
 }
 

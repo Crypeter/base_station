@@ -2,10 +2,24 @@
 #include "terminal.h"
 using namespace std;
 int main(int argc, char const *argv[]) {
-    string name1("../实验数据/jz001.txt"),name2("../实验数据/jz002.txt"),name3("../实验数据/test.txt"),name4("../实验数据/yd001.txt"),filename;
+    string name1("../实验数据/jz001.txt"),name2("../实验数据/jz002.txt"),name3("../实验数据/test.txt"),name4("../实验数据/yd001.txt");
     char cmd[20];
     BaseStationMap *map = new BaseStationMap(name1);
     System *tem = new System(name4);
+    /*
+     * 可以使用的命令
+     * loadMap/lm [filename]                                    加载系统构建地图，未输入则默认为jz001.txt
+     * addMap/am [filename]                                     向现有地图中添加文件
+     * loadSystem/ls [filename]                                 加载系统文件构建系统，未输入则默认为yd001.txt
+     * find/f [XPoint] [YPoint] [n] [class]                     在地图中寻找离输入的坐标最近的点，n表示搜索点的个数，class表示搜索点的类型
+     * rangeFind/rf [X1Point] [Y1Point] [X2Point] [Y2Point]     寻找矩形范围内的点
+     * display/d [class]                                        显示地图中的k-d树，从根节点开始进行显示
+        * lChild/l                                              访问当前节点的左儿子
+        * rChild/r                                              访问当前节点的右儿子
+        * father/f                                              访问当前节点的父亲节点
+     * run/r [degree]                                           根据地图和系统，计算终端通过的轨迹上连接的基站序列，degree为当前计算的精度
+     * exit                                                     退出
+     */
     while(1) {
         cin>>cmd;
         if(strcmp(cmd,"loadMap") == 0){
@@ -79,7 +93,6 @@ int main(int argc, char const *argv[]) {
             while(1){
                 cout<<"请输入访问的树"<<endl;
                 cout<<"0为城镇，1为乡镇，2为高速"<<endl;
-
                 cin>>Class;
                 if(Class >= 0 && Class <= 2){
                     break;
@@ -121,18 +134,10 @@ int main(int argc, char const *argv[]) {
                 }
             }
         } else if (strcmp(cmd,"run") == 0) {
-            for(int i=0;i<tem->number;i++){
-                cout<<"第"<<i<<"个终端的情况"<<endl;
-            for(int j=0;j<tem->group[i].MaxTick;j++){
-                Node *p=(*tem)[i].connectTick(*map);
-                if(p == NULL)
-                    cout<<"此时没有信号"<<endl;
-                else{
-                    cout<<"连接到位于("<<p->XPoint<<","<<p->YPoint<<")的编号为"<<p->number<<"的基站"<<endl;
-                }
-            }
-            cout<<endl;
-            }
+            int degree;
+            cout<<"请输入本次运行的精度"<<endl;
+            cin>>degree;
+            tem->run(*map,degree);
         } else if (strcmp(cmd,"exit") == 0) {
             cout<<"程序已退出"<<endl;
             break;

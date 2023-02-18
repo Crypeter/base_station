@@ -15,13 +15,13 @@ public:
 };
 class terminal {
 public:
-    double StartXPoint;
-    double StartYPoint;
-    double EndXPoint;
-    double EndYPoint;
-    double Speed;
-    Time Start;
-    Time now;
+    double StartXPoint;//起点的x坐标
+    double StartYPoint;//起点的y坐标
+    double EndXPoint;//终点的x坐标
+    double EndYPoint;//终点的y坐标
+    double Speed;//速度
+    Time Start;//开始的时间
+    Time now;//结束的时间
     int MaxTick;//表示将路径划分为多少段
     int place;//表示当前在起点和终点连线上的哪一段
     terminal();
@@ -38,6 +38,7 @@ public:
     void printAll();
     terminal& operator[](int a);
     System(string filename);
+    void run(BaseStationMap &map,int degree);
 };
 
 #endif //BASE_STATION_TERMINAL_H
