@@ -337,9 +337,9 @@ Node *BaseStationMap::BaseStationSearch(double XPoint, double YPoint) {
         distanceF = pow(XPoint-f->XPoint,2)+ pow(YPoint-f->YPoint,2);
         powerF = f->power* pow(f->range,2)/distanceF;//计算离高速最近基站距离，distanceF = (x3-x0)^2+(y3-y0)^2
     }
-    //if(powerT < 1)powerT = 0;
-    //if(powerF < 1)powerF = 0;
-    //if(powerV < 1)powerV = 0;//超出信号范围无信号
+    if(powerT < 1)powerT = 0;
+    if(powerF < 1)powerF = 0;
+    if(powerV < 1)powerV = 0;//超出信号范围无信号
     if(powerT == 0 && powerF == 0 && powerV == 0)return NULL;
     if(powerT > powerV && powerT > powerF)return t;
     if(powerV > powerT && powerV > powerF)return v;

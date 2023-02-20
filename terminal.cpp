@@ -4,6 +4,42 @@
 
 #include "terminal.h"
 #define 精度 100
+int checkEqual(Node *a,Node *b){
+    if(a == NULL && b == NULL){
+        return 1;//a和b都未连接到信号
+    } else if(a == NULL || b == NULL){
+        return 2;//a未连接到信号
+    } else if(a->number == b->number){
+        return 3;//a和b连接到同一个基站
+    } else {
+        return 4;//a和b连接到不同基站
+    }
+}
+
+
+double checkIn(double x1, double y1, Node *p) {
+    double dis = distance(x1,y1,p->XPoint,p->YPoint),R = p->power*pow(p->range,2);
+    return dis - R;
+}
+
+
+void calculate(double x1, double x2, double y1, double y2, Node *p, double &endX, double &endY) {
+    double middleX = (x1+x2)/2,middleY = (y1+y2)/2;
+    double d1 = checkIn(x1,y1,p),d2 = checkIn(x2,y2,p),dm = checkIn(middleX,middleY,p);
+    if(abs(dm)<0.1){
+        endX = middleX;
+        endY = middleY;
+    }
+    else if(d1 * dm < 0){
+        calculate(x1,middleX,y1,middleY,p,endX,endY);
+    }
+    else if(d2 * dm < 0){
+        calculate(middleX,x2,middleY,y2,p,endX,endY);
+    }
+    return;
+}
+
+
 void Time::change(int hour,double minute) {
     if(minute>=60){
         this->minute = (int)minute%60;
@@ -12,6 +48,10 @@ void Time::change(int hour,double minute) {
     else {
         this->hour = hour;
         this->minute = minute;
+    }
+    if(minute<0){
+        this->minute += 60;
+        this->hour--;
     }
     if(this->hour >24){
         this->hour /=24;
@@ -27,6 +67,11 @@ void Time::show() {
     cout<<"在"<<hour<<":"<<minute<<"时";
 }
 
+Time::Time(const Time &a) {
+    this->hour = a.hour;
+    this->minute = a.minute;
+}
+
 void terminal::change(double StartXPoint, double StartYPoint, double EndXPoint, double EndYPoint, double Speed, int hour,double minute) {
     this->StartXPoint = StartXPoint;
     this->StartYPoint = StartYPoint;
@@ -38,14 +83,12 @@ void terminal::change(double StartXPoint, double StartYPoint, double EndXPoint, 
 }
 
 Node* terminal::connectTick(BaseStationMap map) {
-    Node *p=map.BaseStationSearch(StartXPoint+(EndXPoint-StartXPoint)/MaxTick*place,StartYPoint+(EndYPoint-StartYPoint)/MaxTick*place);
+    Node *p=map.BaseStationSearch(StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place),StartYPoint+(EndYPoint-StartYPoint)/MaxTick*place);
     place++;
     double length,time;
     length = sqrt(distance(StartXPoint,StartYPoint,EndXPoint,EndYPoint))/MaxTick;
     time = length/Speed/1000.0*60.0;
     now.change(now.hour,now.minute+time);
-    now.show();
-    cout<<"位于("<<StartXPoint+(EndXPoint-StartXPoint)/MaxTick*place<<","<<StartYPoint+(EndYPoint-StartYPoint)/MaxTick*place<<")处"<<endl;
     return p;
 }
 
@@ -57,6 +100,29 @@ void terminal::change(int tick) {
 terminal::terminal():StartXPoint(0),StartYPoint(0),EndXPoint(0),EndYPoint(0),Speed(0),now(0,0),Start(0,0),MaxTick(精度),place(0){
 }
 
+Node *terminal::lastTick(BaseStationMap map) {
+    if(place == 0 ||place == 1)return map.BaseStationSearch(StartXPoint,StartYPoint);
+    else return map.BaseStationSearch(StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place-2),StartYPoint+(EndYPoint-StartYPoint)/MaxTick*(place-2));
+}
+
+void terminal::getNowPlace(double& XPoint,double& YPoint) {
+    XPoint = StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place-1);
+    YPoint = StartYPoint+(EndYPoint-StartYPoint)/MaxTick*(place-1);
+}
+
+void terminal::getLastPlace(double &XPoint, double &YPoint) {
+    XPoint = StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place-2);
+    YPoint = StartYPoint+(EndYPoint-StartYPoint)/MaxTick*(place-2);
+}
+
+void terminal::display() {
+    Time last(now);
+    double length = sqrt(distance(StartXPoint,StartYPoint,EndXPoint,EndYPoint))/MaxTick;
+    double time = length/Speed/1000.0*60.0;
+    last.change(last.hour,last.minute-time);
+    last.show();
+    cout<<"位于("<<StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place-1)<<","<<StartYPoint+(EndYPoint-StartYPoint)/MaxTick*(place-1)<<")处"<<endl;
+}
 
 
 System::System(string filename) {
@@ -109,13 +175,74 @@ void System::printAll() {
 void System::run(BaseStationMap &map,int degree) {
     for(int i=0;i<number;i++){
         cout<<"第"<<i<<"个终端的情况"<<endl;
-        group[i].MaxTick = degree;
+        if(degree >0){
+            group[i].MaxTick = degree;
+        }
         for(int j=0;j<group[i].MaxTick;j++){
             Node *p=group[i].connectTick(map);
             if(p == NULL)
                 cout<<"此时没有信号"<<endl;
             else{
                 cout<<"连接到位于("<<p->XPoint<<","<<p->YPoint<<")的编号为"<<p->number<<"的基站"<<endl;
+            }
+        }
+        cout<<endl;
+    }
+}
+
+void System::betterRun(BaseStationMap &map, int degree) {
+    for(int i=0;i<number;i++){
+        cout<<"第"<<i<<"个终端的情况"<<endl;
+        if(degree >0){
+            group[i].MaxTick = degree;
+        }
+        for(int j=0;j<group[i].MaxTick;j++){
+            Node *pNow=group[i].connectTick(map);
+            Node *pLast=group[i].lastTick(map);
+            switch(checkEqual(pNow,pLast)){
+                case 1:
+                case 3:
+//                    group[i].display();
+//                    if(pNow == NULL)
+//                        cout<<"此时没有信号"<<endl;
+//                    else{
+//                        cout<<"连接到位于("<<pNow->XPoint<<","<<pNow->YPoint<<")的编号为"<<pNow->number<<"的基站"<<endl;
+//                    }
+                    break;
+                case 2:
+                    if(pNow == NULL){
+                        double xIn,yIn,nowX,nowY,lastX,lastY,length,time;
+                        group[i].getNowPlace(nowX,nowY);
+                        group[i].getLastPlace(lastX,lastY);
+                        calculate(nowX,lastX,nowY,lastY,pLast,xIn,yIn);
+                        Time out(group[i].now);
+                        length = sqrt(distance(lastX,lastY,xIn,yIn))-2*sqrt(distance(group[i].StartXPoint,group[i].StartYPoint,group[i].EndXPoint,group[i].EndYPoint))/group[i].MaxTick;
+                        time = length/group[i].Speed/1000.0*60.0;
+                        out.change(out.hour,out.minute+time);
+                        out.show();
+                        cout<<"位于（"<<xIn<<","<<yIn<<")处"<<endl<<"离开编号为"<<pLast->number<<"的基站信号范围"<<endl;
+                        //group[i].display();
+                        //cout<<"此时没有信号"<<endl;
+                    }
+                    if(pLast == NULL){
+                        double xOut,yOut,nowX,nowY,lastX,lastY,length,time;
+                        group[i].getNowPlace(nowX,nowY);
+                        group[i].getLastPlace(lastX,lastY);
+                        calculate(nowX,lastX,nowY,lastY,pNow,xOut,yOut);
+                        Time out(group[i].now);
+                        length = sqrt(distance(lastX,lastY,xOut,yOut))-2*sqrt(distance(group[i].StartXPoint,group[i].StartYPoint,group[i].EndXPoint,group[i].EndYPoint))/group[i].MaxTick;
+                        time = length/group[i].Speed/1000.0*60.0;
+                        out.change(out.hour,out.minute+time);
+                        out.show();
+                        cout<<"位于（"<<xOut<<","<<yOut<<")处"<<endl<<"进入编号为"<<pNow->number<<"的基站信号范围"<<endl;
+                        //group[i].display();
+                        //cout<<"连接到位于("<<pNow->XPoint<<","<<pNow->YPoint<<")的编号为"<<pNow->number<<"的基站"<<endl;
+                    }
+                    break;
+                case 4:
+                    group[i].display();
+                    if()
+                    cout<<"存在信号重叠区"<<endl;
             }
         }
         cout<<endl;
