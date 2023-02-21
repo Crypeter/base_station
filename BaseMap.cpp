@@ -47,15 +47,8 @@ Deque::Deque(int i) {
 }
 
 void Deque::add(Node *value) {
-    if(isFull()){
         this->place->value = value;
         this->place = this->place->next;
-        this->head = this->place;
-    }
-    else{
-        this->place->value = value;
-        this->place = this->place->next;
-    }
 }
 
 bool Deque::isFull() {

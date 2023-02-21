@@ -1,10 +1,16 @@
 # ninja log v5
 0	5	0	clean	3c8e6cc385ee00ba
-1	217	1676863695590960940	CMakeFiles/base_station.dir/main.cpp.o	a8d0d32fcda3fc85
-1	225	1676863695598738431	CMakeFiles/base_station.dir/terminal.cpp.o	4ca6724e9f4ca57
-1	231	1676785071012297102	CMakeFiles/base_station.dir/BaseMap.cpp.o	4e6bf7dc016367c1
-0	44	1676605930358563493	build.ninja	e6698868dcbdb8d2
-225	255	1676863695630316727	base_station	7e39401f1f9c4364
-2	203	1676860024932077031	CMakeFiles/base_station.dir/UnitTest.cpp.o	856537ed01d61efe
-2	223	1676863901204602898	CMakeFiles/base_station.dir/terminal.cpp.o	4ca6724e9f4ca57
-223	255	1676863901237772892	base_station	7e39401f1f9c4364
+1	206	1676946859948095645	CMakeFiles/base_station.dir/main.cpp.o	a8d0d32fcda3fc85
+2	228	1676946859970338842	CMakeFiles/base_station.dir/terminal.cpp.o	4ca6724e9f4ca57
+1	223	1676944835281820497	CMakeFiles/base_station.dir/BaseMap.cpp.o	4e6bf7dc016367c1
+0	44	1676949227207987377	build.ninja	e6698868dcbdb8d2
+228	259	1676946860001791007	base_station	7e39401f1f9c4364
+2	204	1676939478384930129	CMakeFiles/base_station.dir/UnitTest.cpp.o	856537ed01d61efe
+2	204	1676949240440210777	CMakeFiles/base_station.dir/fakeBase.cpp.o	e606d80a7250d02d
+2	204	1676949240441042201	CMakeFiles/base_station.dir/UnitTest.cpp.o	856537ed01d61efe
+2	208	1676949240445249113	CMakeFiles/base_station.dir/main.cpp.o	a8d0d32fcda3fc85
+3	231	1676949240454187482	CMakeFiles/base_station.dir/myTime.cpp.o	d78fa12f8c6bc16a
+1	212	1676949283065805142	CMakeFiles/base_station.dir/UnitTest.cpp.o	856537ed01d61efe
+1	214	1676949283067630157	CMakeFiles/base_station.dir/main.cpp.o	a8d0d32fcda3fc85
+1	239	1676949283092529916	CMakeFiles/base_station.dir/terminal.cpp.o	4ca6724e9f4ca57
+239	274	1676949283128475646	base_station	f822e08b519a1906
