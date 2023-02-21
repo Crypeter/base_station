@@ -163,11 +163,18 @@ void System::run(BaseStationMap &map,int degree) {
 
 void System:: betterRun(BaseStationMap &map, int degree) {
     for(int i=0;i<number;i++){
-        cout<<"第"<<i<<"个终端的情况"<<endl;
+        cout<<"第"<<i+1<<"个终端的情况"<<endl;
         if(degree >0){
             group[i].MaxTick = degree;
         }
         for(int j=0;j<group[i].MaxTick;j++){
+            if(this->map != NULL){
+                Node *pFake=this->map->NearestFakeFind(group[i].now,group[i].StartXPoint+(group[i].EndXPoint-group[i].StartXPoint)/group[i].MaxTick*group[i].place,group[i].StartYPoint+(group[i].EndYPoint-group[i].StartYPoint)/group[i].MaxTick*group[i].place);
+                if(pFake != NULL){
+                    group[i].display();
+                    cout<<"连接到位于("<<pFake->XPoint<<","<<pFake->YPoint<<")的编号为"<<pFake->number<<"的伪基站"<<endl;
+                }
+            }
             Node *pNow=group[i].connectTick(map);
             Node *pLast=group[i].lastTick(map);
             double xIn,yIn,xOut,yOut,nowX,nowY,lastX,lastY,length,time;
@@ -175,7 +182,7 @@ void System:: betterRun(BaseStationMap &map, int degree) {
             group[i].getLastPlace(lastX,lastY);
             switch(checkEqual(pNow,pLast)){
                 case 1:
-                    cout<<"此时没有信号"<<endl;
+                   // cout<<"此时没有信号"<<endl;
                 case 3:
                     break;
                 case 2:

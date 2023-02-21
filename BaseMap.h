@@ -10,7 +10,7 @@
 #include <cmath>
 #define MaxStore 100
 using namespace std;
-double distance(double x1,double y1,double x2,double y2);//计算点与点之间点欧式几何距离
+double distance(double x1,double x2,double y1,double y2);//计算点与点之间点欧式几何距离
 class Node{
 public:
     double XPoint;//x坐标

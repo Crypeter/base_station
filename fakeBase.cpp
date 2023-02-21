@@ -84,6 +84,7 @@ Node *fakeBaseMap::NearestFakeFind(Time now, int x, int y) {
         distanceF = pow(x-f->XPoint,2)+ pow(y-f->YPoint,2);
         powerF = f->power* pow(f->range,2)/distanceF;//计算离高速最近基站距离，distanceF = (x3-x0)^2+(y3-y0)^2
     }
+    delete fake;
     if(powerF < 1) return NULL;
     else return f;
 }
