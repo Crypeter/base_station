@@ -8,6 +8,7 @@
 #include "myTime.h"
 
 class fakeBase {
+public:
    double StartXPoint;
    double StartYPoint;
    double EndXPoint;
@@ -15,12 +16,21 @@ class fakeBase {
    double Speed;
    Time Start;
    Time End;
-   int number;
-   fakeBase(double StartX,double StartY,double EndX,double EndY,double Speed,int hour,int minute,int number);
+   int key;
+   void change(double StartX,double StartY,double EndX,double EndY,double Speed,int hour,int minute,int key);
+   void calculateXY(Time now,double &X,double &Y);
+   fakeBase();
 };
 
 class fakeBaseMap {
-    fakeBase *start;
-
+public:
+    fakeBase *group;
+    int number;
+    int MaxSize;
+    void resize(int size);
+    KDTree* GetMap(Time now);
+public:
+    fakeBaseMap(string filename);
+    Node* NearestFakeFind(Time now,int x,int y);
 };
 #endif //BASE_STATION_FAKE_BASE_H

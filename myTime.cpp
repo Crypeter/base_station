@@ -16,9 +16,9 @@ void Time::change(int hour,int minute,double second) {
         this->second += 60;
         this->minute--;
     }
-    if(minute>=60||minute <0){
-        this->minute = minute%60;
-        this->hour = hour + minute/60;
+    if(minute>=60 || minute <0){
+        this->minute = this->minute%60;
+        this->hour = hour + this->minute/60;
     }
     else {
         this->hour = hour;
@@ -46,4 +46,13 @@ Time::Time(const Time &a) {
     this->hour = a.hour;
     this->minute = a.minute;
     this->second = a.second;
+}
+
+int Time::checkIN(Time start, Time end) {
+    double startSecond = start.hour*3600.0+start.minute*60.0+start.second;
+    double endSecond = end.hour*3600.0+end.minute*60.0+end.second;
+    double nowSecond = this->hour*3600+this->minute*60.0+this->second;
+    if(nowSecond < startSecond)return 0;
+    else if(nowSecond > endSecond)return 0;
+    else return 1;
 }

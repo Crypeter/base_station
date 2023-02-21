@@ -7,7 +7,8 @@ int main(int argc, char const *argv[]) {
     int n;
     BaseStationMap *map = new BaseStationMap(name1);
     System *tem = new System(name4);
-    tem->run(*map,1000);
+    tem->addFake("../实验数据/wz001.txt");
+    tem->includeFake(*map,1000);
     //map->RangeSearch(1200,30000,2400,24000,n);
     /*
      * 可以使用的命令

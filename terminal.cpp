@@ -222,25 +222,28 @@ void System:: betterRun(BaseStationMap &map, int degree) {
     }
 }
 
-void System::addFake(string filename) {
-    ifstream wz001;
-    wz001.open(filename,ios::in);
-    if(!wz001.is_open())
-    {
-        cout<<"读取失败"<<endl;
-        throw uncaught_exception();
-    }
-    string buf;
-    getline(wz001,buf);//读取文件开头
-    if(!strcmp(buf.c_str(),"WZ"))
-    {
-        cout<<"文件开头错误"<<endl;
-    }
-    double XPoint1,YPoint1,XPoint2,YPoint2,Speed;
-    int hour,minute,number;
-    while(getline(wz001,buf)){
-        sscanf(buf.c_str(),"%lf,%lf,%lf,%lf,%lf,%d,%d,%d",XPoint1,YPoint1,XPoint2,YPoint2,Speed,hour,minute,number);
-
+void System::includeFake(BaseStationMap &map, int degree) {
+    for(int i=0;i<number;i++){
+        cout<<"第"<<i<<"个终端的情况"<<endl;
+        if(degree >0){
+            group[i].MaxTick = degree;
+        }
+        for(int j=0;j<group[i].MaxTick;j++){
+            Node *p=group[i].connectTick(map);
+            Node *p2=this->map->NearestFakeFind(group[i].now,group[i].StartXPoint+(group[i].EndXPoint-group[i].StartXPoint)/group[i].MaxTick*group[i].place,group[i].StartYPoint+(group[i].EndYPoint-group[i].StartYPoint)/group[i].MaxTick*group[i].place);
+            if(p2 == NULL){}
+           //cout<<"此时没有信号"<<endl;
+            else{
+                group[i].display();
+                cout<<"连接到位于("<<p2->XPoint<<","<<p2->YPoint<<")的编号为"<<p2->number<<"的伪基站"<<endl;
+            }
+        }
+        cout<<endl;
     }
 }
+
+void System::addFake(string filename) {
+    map = new fakeBaseMap(filename);
+}
+
 
