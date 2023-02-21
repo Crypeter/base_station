@@ -229,8 +229,8 @@ void System::includeFake(BaseStationMap &map, int degree) {
             group[i].MaxTick = degree;
         }
         for(int j=0;j<group[i].MaxTick;j++){
-            Node *p=group[i].connectTick(map);
             Node *p2=this->map->NearestFakeFind(group[i].now,group[i].StartXPoint+(group[i].EndXPoint-group[i].StartXPoint)/group[i].MaxTick*group[i].place,group[i].StartYPoint+(group[i].EndYPoint-group[i].StartYPoint)/group[i].MaxTick*group[i].place);
+            Node *p=group[i].connectTick(map);
             if(p2 == NULL){}
            //cout<<"此时没有信号"<<endl;
             else{

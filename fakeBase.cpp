@@ -14,7 +14,7 @@ void fakeBase::change(double StartX, double StartY, double EndX, double EndY, do
     this->EndYPoint = EndY;
     this->Speed = Speed;
     Start.change(hour,minute,0);
-    double time = sqrt(distance(StartX,EndX,StartY,EndY))/Speed/1000*60.0*60.0;
+    double time = sqrt(distance(StartX,StartY,EndX,EndY))/Speed/1000*60.0*60.0;
     End.change(hour,minute,time);
     this->key = number;
 }
@@ -23,8 +23,8 @@ void fakeBase::calculateXY(Time now,double &X,double &Y) {
     //time = 3.6*sqrt((X1-x2)^2+(y1-y2)^2)/speed
     //speedX =(x1-x2)/time*3.6
     //X = x1+time*speedX;
-    double speedX = 3.6*(StartXPoint - EndXPoint)/((End.hour-Start.hour)*3600+(End.minute-Start.minute)*60+End.second-Start.second);
-    double speedY = 3.6*(StartYPoint - EndYPoint)/((End.hour-Start.hour)*3600+(End.minute-Start.minute)*60+End.second-Start.second);
+    double speedX = (EndXPoint - StartXPoint)/((End.hour-Start.hour)*3600+(End.minute-Start.minute)*60+End.second-Start.second);
+    double speedY = (EndYPoint - StartYPoint)/((End.hour-Start.hour)*3600+(End.minute-Start.minute)*60+End.second-Start.second);
     X = StartXPoint + ((now.hour-Start.hour)*3600+(now.minute-Start.minute)*60+now.second-Start.second)*speedX;
     Y = StartYPoint + ((now.hour-Start.hour)*3600+(now.minute-Start.minute)*60+now.second-Start.second)*speedY;
 }
@@ -49,6 +49,7 @@ fakeBaseMap::fakeBaseMap(string filename) {
     int hour,minute,number;
     while(getline(wz001,buf)){
         sscanf(buf.c_str(),"%lf,%lf,%lf,%lf,%lf,%d,%d,%d",&XPoint1,&YPoint1,&XPoint2,&YPoint2,&Speed,&hour,&minute,&number);
+        if(XPoint1 == -1 && YPoint1 == -1)break;
         group[this->number].change(XPoint1,YPoint1,XPoint2,YPoint2,Speed,hour,minute,number);
         this->number++;
         if(this->number == MaxSize)resize(MaxSize*2);
