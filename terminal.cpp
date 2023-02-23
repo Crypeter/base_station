@@ -143,36 +143,79 @@ void System::printAll() {
     }
 }
 void System::run(BaseStationMap &map,int degree) {
+    int town(0),village(0),fastRoad(0);
     for(int i=0;i<number;i++){
-        cout<<"第"<<i<<"个终端的情况"<<endl;
+        cout<<"第"<<i+1<<"段终端的情况"<<endl;
         if(degree >0){
             group[i].MaxTick = degree;
         }
+        set<Node> townCollection,villageCollection,fastRoadCollection;
         for(int j=0;j<group[i].MaxTick;j++){
             Node *p=group[i].connectTick(map);
-            group[i].display();
-            if(p == NULL)
-                cout<<"此时没有信号"<<endl;
-            else{
-                cout<<"连接到位于("<<p->XPoint<<","<<p->YPoint<<")的编号为"<<p->number<<"的基站"<<endl;
+            if(p!= NULL){
+                if(p->range == 300){
+                    townCollection.insert(*p);
+                }
+                if(p->range == 1000){
+                    villageCollection.insert(*p);
+                }
+                if(p->range == 5000){
+                    fastRoadCollection.insert(*p);
+                }
             }
         }
+        set<Node>::iterator it;
+        town += townCollection.size();
+        village += villageCollection.size();
+        fastRoad += fastRoadCollection.size();
+        cout<<"连接到"<<townCollection.size()<<"个城市基站"<<endl<<"编号为";
+        for(it = townCollection.begin();it != townCollection.end();it++){
+            cout<<it->number<<",";
+        }
         cout<<endl;
+        cout<<"连接到"<<villageCollection.size()<<"个乡镇基站"<<endl<<"编号为";
+        for(it = villageCollection.begin();it != villageCollection.end();it++){
+            cout<<it->number<<",";
+        }
+        cout<<endl;
+        cout<<"连接到"<<fastRoadCollection.size()<<"个高速基站"<<endl<<"编号为";
+        for(it = fastRoadCollection.begin();it != fastRoadCollection.end();it++){
+            cout<<it->number<<",";
+        }
+        cout<<endl;
+        cout<<"共连接到"<<townCollection.size()+villageCollection.size()+fastRoadCollection.size()<<"个基站"<<endl;
     }
+    cout<<"连接到"<<town<<"个城市基站"<<endl;
+    cout<<"连接到"<<village<<"个乡镇基站"<<endl;
+    cout<<"连接到"<<fastRoad<<"个高速基站"<<endl;
+    cout<<"共连接到"<<town+village+fastRoad<<"个基站"<<endl;
+    cout<<endl;
 }
 
 void System:: betterRun(BaseStationMap &map, int degree) {
     for(int i=0;i<number;i++){
-        cout<<"第"<<i+1<<"个终端的情况"<<endl;
+        cout<<"第"<<i+1<<"段路径终端的情况"<<endl;
         if(degree >0){
             group[i].MaxTick = degree;
         }
+        Time start(0,0,0),end(0,0,0);
+        int flag = 1;
         for(int j=0;j<group[i].MaxTick;j++){
+            Time last(group[i].now);
+            last.change(last.hour,last.minute,last.second-sqrt(pow((group[i].StartXPoint-group[i].EndXPoint)/group[i].MaxTick,2)+pow((group[i].StartYPoint-group[i].EndYPoint)/group[i].MaxTick,2))/group[i].Speed*3.6);
             if(this->map != NULL){
+                Node *pLastFake=this->map->NearestFakeFind(last,group[i].StartXPoint+(group[i].EndXPoint-group[i].StartXPoint)/group[i].MaxTick*(group[i].place-1),group[i].StartYPoint+(group[i].EndYPoint-group[i].StartYPoint)/group[i].MaxTick*(group[i].place-1));
                 Node *pFake=this->map->NearestFakeFind(group[i].now,group[i].StartXPoint+(group[i].EndXPoint-group[i].StartXPoint)/group[i].MaxTick*group[i].place,group[i].StartYPoint+(group[i].EndYPoint-group[i].StartYPoint)/group[i].MaxTick*group[i].place);
-                if(pFake != NULL){
+                if(pLastFake == NULL && pFake != NULL) {
+                    start.copy(group[i].now);
                     group[i].display();
-                    cout<<"连接到位于("<<pFake->XPoint<<","<<pFake->YPoint<<")的编号为"<<pFake->number<<"的伪基站"<<endl;
+                    cout<<"开始连接到编号为"<<pFake->number<<"的伪基站"<<endl;
+                }
+                else if(pLastFake != NULL && pFake == NULL) {
+                    end.copy(group[i].now);
+                    group[i].display();
+                    cout<<"最后一次连接到编号为"<<pLastFake->number<<"的伪基站"<<endl;
+                    cout<<"连接时间为"<<(end.hour-start.hour)*3600+(end.minute-start.minute)*60+(end.second-start.second)+sqrt(pow((group[i].StartXPoint-group[i].EndXPoint)/group[i].MaxTick,2)+pow((group[i].StartYPoint-group[i].EndYPoint)/group[i].MaxTick,2))/group[i].Speed*3.6<<"s"<<endl;
                 }
             }
             Node *pNow=group[i].connectTick(map);

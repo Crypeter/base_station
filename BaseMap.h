@@ -8,6 +8,7 @@
 #include <string>
 #include <stdio.h>
 #include <cmath>
+#include <set>
 #define MaxStore 100
 using namespace std;
 double distance(double x1,double x2,double y1,double y2);//计算点与点之间点欧式几何距离
@@ -24,6 +25,7 @@ public:
     Node *father;//父亲节点
     Node(double XPoint,double YPoint,int range,double power,int number,int vector,Node* father);
     void show();//显示该节点内的信息
+    bool operator < (const Node &) const;
 };
 class LinkNode{
 public:
@@ -47,6 +49,7 @@ public:
 class KDTree{
 private:
     Node *root;
+    void ShowLeave(Node *now);
     void put(Node *now,double XPoint, double YPoint, int range, double power, int number);//向树中加入节点的辅助方法
     Node* nearest(Node *now,double XPoint,double YPoint,Node *best);//寻找最近节点的辅助方法
     void nearestN(Node *now,double XPoint,double YPoint,Deque& best);//寻找n个节点的辅助方法 结果存储在best这个队列中
@@ -54,6 +57,7 @@ private:
 public:
     KDTree(){root = NULL;};
     Node *getRoot();
+    void showAllLeave();
     void put(double XPoint,double YPoint,int range,double power,int number);//向树中加入节点
     Node* NearPointSearch(double  XPoint,double YPoint);//寻找一个节点的最近节点
     Deque NearNPointSearch(double  XPoint,double YPoint,int n);//寻找最近的n个节点

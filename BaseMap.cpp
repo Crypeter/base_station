@@ -26,6 +26,10 @@ void Node::show() {
     cout<<" 编号为"<<number<<endl;
 }
 
+bool Node::operator<(const Node& a) const {
+    return this->number < a.number;
+}
+
 LinkNode *LinkNode::LinkNodeMake(Node *value, LinkNode *before) {
     LinkNode *now = new LinkNode;
     now->value = value;
@@ -246,6 +250,23 @@ void KDTree::rangeSearch(Node *now, double MaxXPoint, double MaxYPoint, double M
 
 Node *KDTree::getRoot() {
     return root;
+}
+
+void KDTree::showAllLeave() {
+    ShowLeave(root);
+}
+
+void KDTree::ShowLeave(Node *now) {
+    if(now->rChild == NULL && now->lChild == NULL){
+        now->show();
+        return;
+    }
+    else{
+        if(now->lChild != NULL)
+        {ShowLeave(now->lChild);}
+        if(now->rChild != NULL)
+        {ShowLeave(now->rChild);}
+    }
 }
 
 BaseStationMap::BaseStationMap(std::string filename) {

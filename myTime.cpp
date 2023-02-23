@@ -56,3 +56,9 @@ int Time::checkIN(Time start, Time end) {
     else if(nowSecond > endSecond)return 0;
     else return 1;
 }
+
+void Time::copy(Time &a) {
+    this->hour = a.hour;
+    this->minute = a.minute;
+    this->second = a.second;
+}

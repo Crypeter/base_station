@@ -15,6 +15,7 @@ public:
     void change(int hour,int minute,double second);//修改时间，自动进位
     void show();//显示当前的时间
     Time(const Time &a);//拷贝函数
+    void copy(Time &a);
     int checkIN(Time start,Time end);
 };
 

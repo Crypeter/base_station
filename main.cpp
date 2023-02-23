@@ -4,11 +4,10 @@ using namespace std;
 int main(int argc, char const *argv[]) {
     string name1("../实验数据/jz001.txt"),name2("../实验数据/jz002.txt"),name3("../实验数据/wz001.txt"),name4("../实验数据/yd001.txt");
     char cmd[20];
-    int n;
     BaseStationMap *map = new BaseStationMap(name1);
+    map->readfile(name2);
     System *tem = new System(name4);
-    //tem->addFake(name3);
-    //tem->includeFake(*map,1000);
+    tem->addFake(name3);
     /*
      * 可以使用的命令
      * loadMap/lm [filename]                                    加载系统构建地图，未输入则默认为jz001.txt
@@ -16,11 +15,14 @@ int main(int argc, char const *argv[]) {
      * loadSystem/ls [filename]                                 加载系统文件构建系统，未输入则默认为yd001.txt
      * loadFake/lf [filename]                                   加载伪基站文件构建系统，未输入则默认为wz001.txt
      * find/f [XPoint] [YPoint] [n] [class]                     在地图中寻找离输入的坐标最近的点，n表示搜索点的个数，class表示搜索点的类型
+     * test/t [XPoint] [YPoint]                                 对地图上某个点进行实验，看是否有信号
      * rangeFind/rf [X1Point] [Y1Point] [X2Point] [Y2Point]     寻找矩形范围内的点
      * display/d [class]                                        显示地图中的k-d树，从根节点开始进行显示
         * lChild/l                                              访问当前节点的左儿子
         * rChild/r                                              访问当前节点的右儿子
         * father/f                                              访问当前节点的父亲节点
+        * all/a                                                 显示所有叶节点
+        * back/b                                                退出当前对树的访问
      * run/r [degree]                                           根据地图和系统，计算终端通过的轨迹上连接的基站序列，degree为当前计算的精度
      * betterRun/br                                             根据地图和系统，精确计算连接的基站的时间,以及路径上连接的伪基站
      * exit                                                     退出
@@ -50,6 +52,7 @@ int main(int argc, char const *argv[]) {
             cin >> filename;
             tem->addFake(filename);
             cout<<"已添加伪基站"<<endl;
+            //tem->includeFake(*map,1000);
         }else if (strcmp(cmd,"find") == 0 || strcmp(cmd,"f") == 0){
             double X,Y;
             int n,Class;
@@ -86,8 +89,20 @@ int main(int argc, char const *argv[]) {
                 Deque store = map->NBaseStationSearch(X,Y,n,name);
                 store.printAll();
             }
-        } else if (strcmp(cmd,"rangeFind") == 0 || strcmp(cmd,"rf") == 0) {
+        } else if(strcmp(cmd,"test") == 0 || strcmp(cmd,"t") == 0){
+            int X,Y;
+            cout<<"请输入X,Y坐标"<<endl;
+            cin>>X>>Y;
+            Node *p = map->BaseStationSearch(X,Y);
+            if(p == NULL){
+                cout<<"超出信号范围"<<endl;
+            }
+            else {
+                p->show();
+            }
+        }else if (strcmp(cmd,"rangeFind") == 0 || strcmp(cmd,"rf") == 0) {
             int n;
+            n = 0;
             double x1,x2,y1,y2;
             cout<<"请输入第一个x坐标和y坐标（以空格隔开）"<<endl;
             cin>>x1>>y1;
@@ -108,7 +123,8 @@ int main(int argc, char const *argv[]) {
                 }
                 else cout<<"错误的类型,请重新输入"<<endl;
             }
-            p = map->getKDTree(Class)->getRoot();
+            KDTree *myTree = map->getKDTree(Class);
+            p = myTree->getRoot();
             while(1){
                 char next[100];
                 p->show();
@@ -135,6 +151,8 @@ int main(int argc, char const *argv[]) {
                         p = p->father;
                     }
                     else cout<<"该节点为根节点"<<endl;
+                }else if(strcmp(next,"all") == 0 || strcmp(next,"a") == 0){
+                    myTree->showAllLeave();
                 }else if(strcmp(next,"back") == 0 || strcmp(next,"b") == 0){
                     cout<<"已退出树访问"<<endl;
                     break;
@@ -148,7 +166,7 @@ int main(int argc, char const *argv[]) {
             cin>>degree;
             tem->run(*map,degree);
         } else if (strcmp(cmd,"betterRun") == 0 || strcmp(cmd,"br") == 0) {
-            tem->betterRun(*map, 1000);
+            tem->betterRun(*map, 10000);
         } else if (strcmp(cmd,"exit") == 0) {
                 cout<<"程序已退出"<<endl;
                 break;
