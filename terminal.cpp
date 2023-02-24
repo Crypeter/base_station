@@ -143,6 +143,10 @@ void System::printAll() {
     }
 }
 void System::run(BaseStationMap &map,int degree) {
+    for(int i = 0;i<number;i++){
+        group[i].place = 0;
+        group[i].now.copy(group[i].Start);
+    }
     int town(0),village(0),fastRoad(0);
     for(int i=0;i<number;i++){
         cout<<"第"<<i+1<<"段终端的情况"<<endl;
@@ -184,6 +188,9 @@ void System::run(BaseStationMap &map,int degree) {
         }
         cout<<endl;
         cout<<"共连接到"<<townCollection.size()+villageCollection.size()+fastRoadCollection.size()<<"个基站"<<endl;
+        townCollection.clear();
+        villageCollection.clear();
+        fastRoadCollection.clear();
     }
     cout<<"连接到"<<town<<"个城市基站"<<endl;
     cout<<"连接到"<<village<<"个乡镇基站"<<endl;
@@ -193,6 +200,10 @@ void System::run(BaseStationMap &map,int degree) {
 }
 
 void System:: betterRun(BaseStationMap &map, int degree) {
+    for(int i = 0;i<number;i++){
+        group[i].place = 0;
+        group[i].now.copy(group[i].Start);
+    }
     for(int i=0;i<number;i++){
         cout<<"第"<<i+1<<"段路径终端的情况"<<endl;
         if(degree >0){
@@ -281,8 +292,9 @@ void System::includeFake(BaseStationMap &map, int degree) {
         for(int j=0;j<group[i].MaxTick;j++){
             Node *p2=this->map->NearestFakeFind(group[i].now,group[i].StartXPoint+(group[i].EndXPoint-group[i].StartXPoint)/group[i].MaxTick*group[i].place,group[i].StartYPoint+(group[i].EndYPoint-group[i].StartYPoint)/group[i].MaxTick*group[i].place);
             Node *p=group[i].connectTick(map);
-            if(p2 == NULL){}
-           //cout<<"此时没有信号"<<endl;
+            if(p2 == NULL){
+
+            }
             else{
                 group[i].display();
                 cout<<"连接到位于("<<p2->XPoint<<","<<p2->YPoint<<")的编号为"<<p2->number<<"的伪基站"<<endl;

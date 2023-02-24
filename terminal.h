@@ -33,18 +33,18 @@ public:
 class System {
 private:
     terminal* group;//存储终端数组
-    fakeBaseMap *map;
+    fakeBaseMap *map;//伪基站地图
     int number;//终端的数量
     int maxsize;//终端最大的存储数量
     void resize(int size);//超过上限后对数组大小进行调整
 public:
-    void printAll();
+    void printAll();//显示所有存储的终端
     terminal& operator[](int a);
-    System(string filename);
-    void addFake(string filename);
+    System(string filename);//根据对应的文件初始化
+    void addFake(string filename);//向系统中添加伪基站
     void run(BaseStationMap &map,int degree);//对每个终端轨迹上连接的基站进行计算,不计算离开的时间
     void betterRun(BaseStationMap &map,int degree);//对每个终端轨迹上连接的基站进行计算，精准计算离开的时间和更换基站的时间点
-    void includeFake(BaseStationMap &map,int degree);
+    void includeFake(BaseStationMap &map,int degree);//对伪基站序列进行计算
 };
 
 #endif //BASE_STATION_TERMINAL_H
