@@ -12,6 +12,7 @@
 #include <set>
 #include <thread>
 #include <future>
+#include <deque>
 double distance(double x1,double x2,double y1,double y2);//计算点与点之间点欧式几何距离
 using namespace std;
 class BNode{
@@ -33,6 +34,14 @@ public:
     block();
     void addPoint(double X,double Y,int range,double strength,int number);//向区块中加入点
 };
+class findBlock{
+public:
+    int distance;//距离搜索底层的距离
+    int Xi;//当前的X哈希
+    int Yi;//当前的Y哈希
+    findBlock(int Xi,int Yi,int distance);
+};
+int levelCheck(deque<findBlock*> *store,int level);
 class blocks{
 public:
     double MaxX;//总块的最大X坐标
@@ -45,7 +54,6 @@ public:
     int checkInBlock(int Xi,int Yi);//检查当前值是否在总块内
     int NotVisited(int Xi,int Yi,int *visit);//检验该区块是否被访问过
     void resize();//当总块的基站数达到一定数目后，将每个区块切分为4个更小的区块
-    BNode *NearestFind(int Xi,int Yi,int Class,double X,double Y,int *visit);//找寻最近基站的辅助方法
 public:
     int hashX(double X);//计算X坐标对应的X区块
     int hashY(double Y);//计算y坐标对应的Y区块
@@ -54,8 +62,6 @@ public:
     void addPoint(double X,double Y,int range,double strength,int number);//向总块中添加基站
     BNode *nearestFind(double X,double Y,int Class);//寻找最近基站
 };
-BNode *NearestFind(blocks *group,int Xi,int Yi,int Class,double X,double Y,int *visit);//找寻最近基站的辅助方法,为多线程准备
-BNode *nearestFind1(blocks *group,double X,double Y,int Class);//寻找最近基站,为多线程准备
 class BlocksBaseMap : public blocks{
 public:
     void put(double X,double Y,char* range,double strength,int number);//向图中加入基站

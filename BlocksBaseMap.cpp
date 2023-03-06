@@ -3,78 +3,6 @@
 //
 //此文件为废弃的实现文件，最终未使用该文件进行计算
 #include "BlocksBaseMap.h"
-BNode *NearestFind(blocks *now,int Xi,int Yi,int Class,double X,double Y,int* visit){
-    if(Xi >= now->size || Xi < 0 || Yi >= now->size || Yi<0)return NULL;
-    block *b = now->group+(Yi*now->size)+Xi;
-    visit[Yi*now->size+Xi]=1;
-    BNode *best = NULL;
-    for(int i = 0;i<b->number;i++){
-        if(b->group[i].range == 300 && Class == 1){
-            if(best == NULL)best = b->group+i;
-            else{
-                if(distance(b->group[i].X,b->group[i].Y,X,Y)< distance(best->X,best->Y,X,Y)){
-                    best = b->group+i;
-                }
-            }
-        }
-        else if(b->group[i].range == 1000 && Class == 2) {
-            if(best == NULL)best = b->group+i;
-            else{
-                if(distance(b->group[i].X,b->group[i].Y,X,Y)< distance(best->X,best->Y,X,Y)){
-                    best = b->group+i;
-                }
-            }
-        }
-        else if(b->group[i].range == 5000 && Class == 3){
-            if(best == NULL)best = b->group+i;
-            else{
-                if(distance(b->group[i].X,b->group[i].Y,X,Y)< distance(best->X,best->Y,X,Y)){
-                    best = b->group+i;
-                }
-            }
-        }
-    }
-    if(best == NULL) {
-        BNode *find[8]={NULL};
-        if(Yi-1 >= 0 && visit[(Yi-1)*now->size+Xi]==0){
-            find[0]=NearestFind(now, Xi, Yi - 1, Class, X, Y,visit);}
-        if(Yi+1 < now->size && visit[(Yi+1)*now->size+Xi]==0){
-            find[1]=NearestFind(now, Xi, Yi + 1, Class, X, Y,visit);}
-        if(Xi-1 >= 0 && visit[(Yi)*now->size+Xi-1]==0){
-            find[2]=NearestFind(now, Xi - 1, Yi , Class, X, Y,visit);}
-        if(Xi+1 < now->size && visit[(Yi)*now->size+Xi+1]==0){
-            find[3]=NearestFind(now, Xi + 1, Yi, Class, X, Y,visit);}
-        if(Yi-1 >= 0 && Xi-1 >= 0 && visit[(Yi-1)*now->size+Xi-1]==0){
-            find[4]=NearestFind(now, Xi - 1, Yi - 1, Class, X, Y,visit);}
-        if(Yi-1 >= 0 && Xi+1 < now->size && visit[(Yi-1)*now->size+Xi+1]== 0){
-            find[5]=NearestFind(now, Xi + 1, Yi - 1, Class, X, Y,visit);}
-        if(Yi+1 < now->size && Xi-1 >= 0 && visit[(Yi+1)*now->size+Xi-1] == 0){
-            find[6]=NearestFind(now, Xi - 1, Yi + 1, Class, X, Y,visit);}
-        if(Yi+1 < now->size && Xi+1 < now->size && visit[(Yi+1)*now->size+Xi+1] ==0 ){
-            find[7]=NearestFind(now, Xi + 1, Yi + 1, Class, X, Y,visit);}
-        for(int i=0;i<8;i++){
-            if(find[i] == NULL)continue;
-            if(best == NULL)best = find[i];
-            else{
-                if(distance(find[i]->X,find[i]->Y,X,Y)< distance(best->X,best->Y,X,Y)){
-                    best = find[i];
-                }
-            }
-        }
-    }
-    return best;
-}
-
-BNode *nearestFind1(blocks *now,double X,double Y,int Class){
-    int size=now->size*now->size;
-    int *visit=(int *) malloc(sizeof(int)*size);
-    for(int i=0;i<size;i++){
-        visit[i]=0;
-    }
-    int findXi = now->hashX(X),findYi = now->hashY(Y);
-    if(findXi > now->size || findYi > now->size)return NULL;
-    else return NearestFind(now,findXi,findYi,Class,X,Y,visit);
-}
 
 void BNode::copy(BNode *a) {
     X = a->X;
@@ -156,80 +84,100 @@ BNode *blocks::nearestFind(double X, double Y, int Class) {
     for(int i = 0;i<blocksNumber;i++){
         visit[i]=0;
     }
-    int findXi = hashX(X),findYi = hashY(Y);
-    return NearestFind(findXi,findYi,Class,X,Y,visit);
-}
-
-BNode *blocks::NearestFind(int Xi, int Yi, int Class, double X, double Y, int *visit) {
-    if(!checkInBlock(Xi,Yi))return NULL;
-    block *nowSearch = group+(Yi*size)+Xi;
-    visit[Yi*size+Xi] = 1;
+    int Xi = hashX(X),Yi = hashY(Y);
+    block *nowSearch = NULL;
     BNode *best = NULL;
-    for(int i = 0;i<nowSearch->number;i++){
-        if(nowSearch->group[i].range == 300 && Class == 1){
-            if(best == NULL)best = nowSearch->group+i;
-            else{
-                if(distance(nowSearch->group[i].X,nowSearch->group[i].Y,X,Y) < distance(best->X,best->Y,X,Y)){
-                    best = nowSearch->group+i;
+    int level = 0;
+    deque<findBlock*> store;
+    store.push_front(new findBlock(Xi,Yi,0));
+    visit[Yi*size+Xi]=1;
+    while(!store.empty()) {
+        findBlock *nowFind = store.back();
+        nowSearch = group + (nowFind->Yi * size) + nowFind->Xi;
+        for (int i = 0; i < nowSearch->number; i++) {
+            if (nowSearch->group[i].range == 300 && Class == 1) {
+                if (best == NULL)best = nowSearch->group + i;
+                else {
+                    if (distance(nowSearch->group[i].X, nowSearch->group[i].Y, X, Y) <
+                        distance(best->X, best->Y, X, Y)) {
+                        best = nowSearch->group + i;
+                    }
+                }
+            }
+            if (nowSearch->group[i].range == 1000 && Class == 2) {
+                if (best == NULL)best = nowSearch->group + i;
+                else {
+                    if (distance(nowSearch->group[i].X, nowSearch->group[i].Y, X, Y) <
+                        distance(best->X, best->Y, X, Y)) {
+                        best = nowSearch->group + i;
+                    }
+                }
+            }
+            if (nowSearch->group[i].range == 5000 && Class == 3) {
+                if (best == NULL)best = nowSearch->group + i;
+                else {
+                    if (distance(nowSearch->group[i].X, nowSearch->group[i].Y, X, Y) <
+                        distance(best->X, best->Y, X, Y)) {
+                        best = nowSearch->group + i;
+                    }
                 }
             }
         }
-        if(nowSearch->group[i].range == 1000 && Class == 2){
-            if(best == NULL)best = nowSearch->group+i;
+        store.pop_back();
+        if(levelCheck(&store,level)){
+            if(best!=NULL){
+                return best;
+            }
             else{
-                if(distance(nowSearch->group[i].X,nowSearch->group[i].Y,X,Y) < distance(best->X,best->Y,X,Y)){
-                    best = nowSearch->group+i;
-                }
+                level++;
             }
         }
-        if(nowSearch->group[i].range == 5000 && Class == 3){
-            if(best == NULL)best = nowSearch->group+i;
-            else{
-                if(distance(nowSearch->group[i].X,nowSearch->group[i].Y,X,Y) < distance(best->X,best->Y,X,Y)){
-                    best = nowSearch->group+i;
-                }
-            }
+        if(checkInBlock(nowFind->Xi+1,nowFind->Yi)&& NotVisited(nowFind->Xi+1,nowFind->Yi,visit)){
+            visit[nowFind->Yi*size+nowFind->Xi+1]=1;
+            store.push_front(new findBlock(nowFind->Xi+1,nowFind->Yi,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi-1,nowFind->Yi)&& NotVisited(nowFind->Xi-1,nowFind->Yi,visit)){
+            visit[nowFind->Yi*size+nowFind->Xi-1]=1;
+            store.push_front(new findBlock(nowFind->Xi-1,nowFind->Yi,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi,nowFind->Yi+1)&& NotVisited(nowFind->Xi,nowFind->Yi+1,visit)){
+            visit[(nowFind->Yi+1)*size+nowFind->Xi]=1;
+            store.push_front(new findBlock(nowFind->Xi,nowFind->Yi+1,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi,nowFind->Yi-1)&& NotVisited(nowFind->Xi,nowFind->Yi-1,visit)){
+            visit[(nowFind->Yi-1)*size+nowFind->Xi]=1;
+            store.push_front(new findBlock(nowFind->Xi,nowFind->Yi-1,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi+1,nowFind->Yi+1)&& NotVisited(nowFind->Xi+1,nowFind->Yi+1,visit)){
+            visit[(nowFind->Yi+1)*size+nowFind->Xi+1]=1;
+            store.push_front(new findBlock(nowFind->Xi+1,nowFind->Yi+1,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi+1,nowFind->Yi-1)&& NotVisited(nowFind->Xi+1,nowFind->Yi-1,visit)){
+            visit[(nowFind->Yi-1)*size+nowFind->Xi+1]=1;
+            store.push_front(new findBlock(nowFind->Xi+1,nowFind->Yi-1,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi-1,nowFind->Yi+1)&& NotVisited(nowFind->Xi-1,nowFind->Yi+1,visit)){
+            visit[(nowFind->Yi+1)*size+nowFind->Xi-1]=1;
+            store.push_front(new findBlock(nowFind->Xi-1,nowFind->Yi+1,nowFind->distance+1));
+        }
+        if(checkInBlock(nowFind->Xi-1,nowFind->Yi-1)&& NotVisited(nowFind->Xi-1,nowFind->Yi-1,visit)){
+            visit[(nowFind->Yi-1)*size+nowFind->Xi-1]=1;
+            store.push_front(new findBlock(nowFind->Xi-1,nowFind->Yi-1,nowFind->distance+1));
         }
     }
-    if(best == NULL){
-        BNode *neighbor[8] = {NULL};
-        if(checkInBlock(Xi,Yi-1)&& NotVisited(Xi,Yi-1,visit)){
-            neighbor[0]= NearestFind(Xi,Yi-1,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi,Yi+1)&& NotVisited(Xi,Yi+1,visit)){
-            neighbor[1]= NearestFind(Xi,Yi+1,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi-1,Yi)&& NotVisited(Xi-1,Yi,visit)){
-            neighbor[2]= NearestFind(Xi-1,Yi,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi+1,Yi)&& NotVisited(Xi+1,Yi,visit)){
-            neighbor[3]= NearestFind(Xi+1,Yi,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi+1,Yi-1)&& NotVisited(Xi+1,Yi-1,visit)){
-            neighbor[4]= NearestFind(Xi+1,Yi-1,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi-1,Yi-1)&& NotVisited(Xi-1,Yi-1,visit)){
-            neighbor[5]= NearestFind(Xi-1,Yi-1,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi+1,Yi+1)&& NotVisited(Xi+1,Yi+1,visit)){
-            neighbor[6]= NearestFind(Xi+1,Yi+1,Class,X,Y,visit);
-        }
-        if(checkInBlock(Xi-1,Yi+1)&& NotVisited(Xi-1,Yi+1,visit)){
-            neighbor[7]= NearestFind(Xi-1,Yi+1,Class,X,Y,visit);
-        }
-        for(int i=0;i<8;i++){
-            if(neighbor[i] == NULL)continue;
-            if(best == NULL)best = neighbor[i];
-            else{
-                if(distance(neighbor[i]->X,neighbor[i]->Y,X,Y) < distance(best->X,best->Y,X,Y)){
-                    best = neighbor[i];
-                }
-            }
-        }
-    }
-    return best;
 }
 
+int levelCheck(deque<findBlock*> *store,int level){
+    deque<findBlock*>::iterator it;
+    int flag=1;
+    for(it = store->begin();it!=store->end();it++){
+        if((*it)->distance == level){
+            flag = 0;
+            break;
+        }
+    }
+    return flag;
+}
 void blocks::resize() {
     size *= 2;
     block *newOne = new block[size*size];
@@ -297,10 +245,6 @@ void BlocksBaseMap::blockDisplay(int Xi, int Yi) {
 }
 
 BNode *BlocksBaseMap::bestFind(double X, double Y) {
-//    future<BNode *>t1 = async(nearestFind1,this,X,Y,1);
-//    future<BNode *>t2 = async(nearestFind1,this,X,Y,2);
-//    future<BNode *>t3 = async(nearestFind1,this,X,Y,3);
-//    BNode *town = t1.get(),*village = t2.get(),*fast = t3.get();
     //BNode *town = nearestFind1(this,X,Y,1),*village = nearestFind1(this,X,Y,2),*fast = nearestFind1(this,X,Y,3);
     BNode *town = nearestFind(X,Y,1),*village = nearestFind(X,Y,2),*fast = nearestFind(X,Y,3);
     double pt,pv,pf;
@@ -314,4 +258,8 @@ BNode *BlocksBaseMap::bestFind(double X, double Y) {
 }
 
 
-
+findBlock::findBlock(int Xi, int Yi, int distance) {
+    this->Xi = Xi;
+    this->Yi = Yi;
+    this->distance = distance;
+}

@@ -3,8 +3,10 @@
 //
 
 #include "terminal.h"
-#include "time.h"
+#include <chrono>
 #define 精度 1000
+extern mutex tex;
+using namespace chrono;
 int checkEqual(Node *a,Node *b){
     if(a == NULL && b == NULL){
         return 1;//a和b都未连接到信号
@@ -143,6 +145,30 @@ void System::resize(int size) {
 
 }
 
+void System::threadRun(BaseStationMap &map, int start, int end, int i, set<Node> *townCollection,
+                       set<Node> *villageCollection, set<Node> *fastCollection) {
+    for(int j=start;j<end;j++){
+        Node *p=group[i].connectTick(map);
+        if(p!= NULL){
+            if(p->range == 300){
+                tex.lock();
+                townCollection->insert(*p);
+                tex.unlock();
+            }
+            if(p->range == 1000){
+                tex.lock();
+                villageCollection->insert(*p);
+                tex.unlock();
+            }
+            if(p->range == 5000){
+                tex.lock();
+                fastCollection->insert(*p);
+                tex.unlock();
+            }
+        }
+    }
+}
+
 terminal &System::operator[](int a) {
     if(a >= number)throw uncaught_exception();
     else return group[a];
@@ -154,7 +180,7 @@ void System::printAll() {
     }
 }
 void System::run(BaseStationMap &map,int degree) {
-    clock_t start = clock();
+    auto start = system_clock::now();
     for(int i = 0;i<number;i++){
         group[i].place = 0;
         group[i].now.copy(group[i].Start);
@@ -166,19 +192,29 @@ void System::run(BaseStationMap &map,int degree) {
             group[i].MaxTick = degree;
         }
         set<Node> townCollection,villageCollection,fastRoadCollection;
-        for(int j=0;j<group[i].MaxTick;j++){
-            Node *p=group[i].connectTick(map);
-            if(p!= NULL){
-                if(p->range == 300){
-                    townCollection.insert(*p);
-                }
-                if(p->range == 1000){
-                    villageCollection.insert(*p);
-                }
-                if(p->range == 5000){
-                    fastRoadCollection.insert(*p);
-                }
-            }
+        thread th[10];
+        auto fun1 = bind(&System::threadRun,this,map,0,group[i].MaxTick/10,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun2 = bind(&System::threadRun,this,map,group[i].MaxTick/10,group[i].MaxTick/10*2,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun3 = bind(&System::threadRun,this,map,group[i].MaxTick/10*2,group[i].MaxTick/10*3,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun4 = bind(&System::threadRun,this,map,group[i].MaxTick/10*3,group[i].MaxTick/10*4,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun5 = bind(&System::threadRun,this,map,group[i].MaxTick/10*4,group[i].MaxTick/10*5,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun6 = bind(&System::threadRun,this,map,group[i].MaxTick/10*5,group[i].MaxTick/10*6,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun7 = bind(&System::threadRun,this,map,group[i].MaxTick/10*6,group[i].MaxTick/10*7,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun8 = bind(&System::threadRun,this,map,group[i].MaxTick/10*7,group[i].MaxTick/10*8,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun9 = bind(&System::threadRun,this,map,group[i].MaxTick/10*8,group[i].MaxTick/10*9,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun10 = bind(&System::threadRun,this,map,group[i].MaxTick/10*9,group[i].MaxTick,i,&townCollection,&villageCollection,&fastRoadCollection);
+        th[0] = thread(fun1);
+        th[1] = thread(fun2);
+        th[2] = thread(fun3);
+        th[3] = thread(fun4);
+        th[4] = thread(fun5);
+        th[5] = thread(fun6);
+        th[6] = thread(fun7);
+        th[7] = thread(fun8);
+        th[8] = thread(fun9);
+        th[9] = thread(fun10);
+        for (int j = 0; j < 10; ++j) {
+            th[j].join();
         }
         set<Node>::iterator it;
         town += townCollection.size();
@@ -209,8 +245,9 @@ void System::run(BaseStationMap &map,int degree) {
     cout<<"连接到"<<fastRoad<<"个高速基站"<<endl;
     cout<<"共连接到"<<town+village+fastRoad<<"个基站"<<endl;
     cout<<endl;
-    clock_t end = clock();
-    cout<<"用时"<<(end-start)/1.0/CLOCKS_PER_SEC<<"s"<<endl;
+    auto end   = system_clock::now();
+    auto duration = duration_cast<microseconds>(end - start);
+    cout <<  "花费了"<< double(duration.count()) * microseconds::period::num / microseconds::period::den<< "秒" << endl;
 }
 
 void System:: betterRun(BaseStationMap &map, int degree) {
@@ -323,7 +360,7 @@ void System::addFake(string filename) {
 }
 
 void System::run(BlocksBaseMap &map, int degree) {
-    clock_t start = clock();
+    auto start = system_clock::now();
     for(int i = 0;i<number;i++){
         group[i].place = 0;
         group[i].now.copy(group[i].Start);
@@ -335,19 +372,49 @@ void System::run(BlocksBaseMap &map, int degree) {
             group[i].MaxTick = degree;
         }
         set<BNode> townCollection,villageCollection,fastRoadCollection;
-        for(int j=0;j<group[i].MaxTick;j++){
-            BNode *p=group[i].connectTick(map);
-            if(p!= NULL){
-                if(p->range == 300){
-                    townCollection.insert(*p);
-                }
-                if(p->range == 1000){
-                    villageCollection.insert(*p);
-                }
-                if(p->range == 5000){
-                    fastRoadCollection.insert(*p);
-                }
-            }
+//        for(int j=0;j<group[i].MaxTick;j++){
+//            BNode *p=group[i].connectTick(map);
+//            if(p!= NULL){
+//                if(p->range == 300){
+//                    tex.lock();
+//                    townCollection.insert(*p);
+//                    tex.unlock();
+//                }
+//                if(p->range == 1000){
+//                    tex.lock();
+//                    villageCollection.insert(*p);
+//                    tex.unlock();
+//                }
+//                if(p->range == 5000){
+//                    tex.lock();
+//                    fastRoadCollection.insert(*p);
+//                    tex.unlock();
+//                }
+//            }
+//        }
+        thread th[10];
+        auto fun1 = bind(&System::threadRunB,this,map,0,group[i].MaxTick/10,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun2 = bind(&System::threadRunB,this,map,group[i].MaxTick/10,group[i].MaxTick/10*2,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun3 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*2,group[i].MaxTick/10*3,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun4 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*3,group[i].MaxTick/10*4,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun5 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*4,group[i].MaxTick/10*5,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun6 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*5,group[i].MaxTick/10*6,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun7 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*6,group[i].MaxTick/10*7,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun8 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*7,group[i].MaxTick/10*8,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun9 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*8,group[i].MaxTick/10*9,i,&townCollection,&villageCollection,&fastRoadCollection);
+        auto fun10 = bind(&System::threadRunB,this,map,group[i].MaxTick/10*9,group[i].MaxTick,i,&townCollection,&villageCollection,&fastRoadCollection);
+        th[0] = thread(fun1);
+        th[1] = thread(fun2);
+        th[2] = thread(fun3);
+        th[3] = thread(fun4);
+        th[4] = thread(fun5);
+        th[5] = thread(fun6);
+        th[6] = thread(fun7);
+        th[7] = thread(fun8);
+        th[8] = thread(fun9);
+        th[9] = thread(fun10);
+        for (int j = 0; j < 10; ++j) {
+            th[j].join();
         }
         set<BNode>::iterator it;
         town += townCollection.size();
@@ -378,8 +445,33 @@ void System::run(BlocksBaseMap &map, int degree) {
     cout<<"连接到"<<fastRoad<<"个高速基站"<<endl;
     cout<<"共连接到"<<town+village+fastRoad<<"个基站"<<endl;
     cout<<endl;
-    clock_t end = clock();
-    cout<<"用时"<<(end-start)/1.0/CLOCKS_PER_SEC<<"s"<<endl;
+    auto end   = system_clock::now();
+    auto duration = duration_cast<microseconds>(end - start);
+    cout <<  "花费了"<< double(duration.count()) * microseconds::period::num / microseconds::period::den<< "秒" << endl;
+}
+
+void System::threadRunB(BlocksBaseMap &map, int start, int end, int i, set<BNode> *townCollection,
+                       set<BNode> *villageCollection, set<BNode> *fastCollection) {
+    for(int j=start;j<end;j++){
+        BNode *p=group[i].connectTick(map);
+        if(p!= NULL){
+            if(p->range == 300){
+                tex.lock();
+                townCollection->insert(*p);
+                tex.unlock();
+            }
+            if(p->range == 1000){
+                tex.lock();
+                villageCollection->insert(*p);
+                tex.unlock();
+            }
+            if(p->range == 5000){
+                tex.lock();
+                fastCollection->insert(*p);
+                tex.unlock();
+            }
+        }
+    }
 }
 
 

@@ -2,6 +2,7 @@
 #include "terminal.h"
 #include "BlocksBaseMap.h"
 using namespace std;
+mutex tex;
 int main(int argc, char const *argv[]) {
     string name1("../实验数据/jz001.txt"),name2("../实验数据/jz002.txt"),name3("../实验数据/wz001.txt"),name4("../实验数据/yd001.txt");
     char cmd[20];
@@ -12,6 +13,7 @@ int main(int argc, char const *argv[]) {
     BlocksBaseMap *map2 = new BlocksBaseMap;
     map2->readfile(name1);
     map2->readfile(name2);
+    //map2->nearestFind(10000,23500,2);
     /*
      * 可以使用的命令
      * loadMap/lm [filename]                                    加载系统构建地图，未输入则默认为jz001.txt

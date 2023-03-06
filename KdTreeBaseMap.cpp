@@ -7,45 +7,6 @@ double distance(double x1,double y1,double x2,double y2){
     return pow(x1-x2,2)+pow(y1-y2,2);
 }
 
-Node *nearest(Node *now, double XPoint, double YPoint, Node *best) {
-    Node *goodSide,*badSide;
-    if(now == NULL)return best;
-    if(distance(now->XPoint,now->YPoint,XPoint,YPoint) < distance(best->XPoint,best->YPoint,XPoint,YPoint))
-        best = now;
-    if(now->vector == 0){
-        if(XPoint < now->XPoint){
-            goodSide = now->lChild;
-            badSide = now->rChild;
-        }
-        else{
-            goodSide = now->rChild;
-            badSide = now->lChild;
-        }
-    }
-    else{
-        if(YPoint < now->YPoint){
-            goodSide = now->lChild;
-            badSide = now->rChild;
-        }
-        else{
-            goodSide = now->rChild;
-            badSide = now->lChild;
-        }
-    }
-    best = nearest(goodSide,XPoint,YPoint,best);
-    if(now->vector == 0){
-        if(distance(best->XPoint,best->YPoint,XPoint,YPoint) > abs(now->XPoint-XPoint)){
-            best = nearest(badSide,XPoint,YPoint,best);
-        }
-    }
-    else{
-        if(distance(best->XPoint,best->YPoint,XPoint,YPoint) >abs(now->YPoint-YPoint)){
-            best = nearest(badSide,XPoint,YPoint,best);
-        }
-    }
-    return best;
-}
-
 Node::Node(double XPoint, double YPoint, int range, double power, int number, int vector,Node* father) {
         this->XPoint = XPoint;
         this->YPoint = YPoint;
@@ -391,12 +352,6 @@ void BaseStationMap::put(double XPoint, double YPoint, char *space, double power
 }
 
 Node *BaseStationMap::BaseStationSearch(double XPoint, double YPoint) {
-//    future<Node *>t1 = async(nearest,town->getRoot(),XPoint,YPoint,town->getRoot());
-//    future<Node *>v1 = async(nearest,village->getRoot(),XPoint,YPoint,village->getRoot());
-//    future<Node *>f1 = async(nearest,fastRoad->getRoot(),XPoint,YPoint,fastRoad->getRoot());
-//    Node *t = t1.get();
-//    Node *v = v1.get();
-//    Node *f = f1.get();
     Node *t=town->NearPointSearch(XPoint,YPoint);
     Node *v=village->NearPointSearch(XPoint,YPoint);
     Node *f=fastRoad->NearPointSearch(XPoint,YPoint);

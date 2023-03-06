@@ -11,6 +11,7 @@
 #include <future>
 #include <cmath>
 #include <set>
+#include <mutex>
 #define MaxStore 100
 using namespace std;
 double distance(double x1,double x2,double y1,double y2);//计算点与点之间点欧式几何距离
@@ -29,7 +30,6 @@ public:
     void show();//显示该节点内的信息
     bool operator < (const Node &) const;
 };
-Node* nearest(Node *now,double XPoint,double YPoint,Node *best);//寻找最近节点的辅助方法,方便多线程调用
 class LinkNode{
 public:
     Node *value;//存储节点信息

@@ -46,6 +46,8 @@ public:
     void addFake(string filename);//向系统中添加伪基站
     void run(BaseStationMap &map,int degree);//对每个终端轨迹上连接的基站进行计算,不计算离开的时间
     void run(BlocksBaseMap &map,int degree);
+    void threadRun(BaseStationMap &map,int start,int end,int i,set<Node> *townCollection,set<Node> *villageCollection,set<Node> *fastCollection);//k-d树法多线程调度辅助函数
+    void threadRunB(BlocksBaseMap &map,int start,int end,int i,set<BNode> *townCollection,set<BNode> *villageCollection,set<BNode> *fastCollection);//动态分块法多线程调度辅助函数
     void betterRun(BaseStationMap &map,int degree);//对每个终端轨迹上连接的基站进行计算，精准计算离开的时间和更换基站的时间点
     void includeFake(BaseStationMap &map,int degree);//对伪基站序列进行计算
 };
