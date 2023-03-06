@@ -2,6 +2,10 @@
 // Created by 张飞扬 on 2023/1/10.
 //
 //此文件为废弃的头文件，最终未采用该数据结构进行计算
+//此文件为废弃的头文件，最终未采用该数据结构进行计算
+//此文件为废弃的实现文件，最终未使用该文件进行计算
+//此文件为废弃的实现文件，最终未使用该文件进行计算
+//此文件为废弃的实现文件，最终未使用该文件进行计算
 #ifndef BASE_STATION_BLOCKS_BASEMAP_H
 #define BASE_STATION_BLOCKS_BASEMAP_H
 #include <iostream>
