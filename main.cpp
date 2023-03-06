@@ -1,19 +1,24 @@
-#include "BaseMap.h"
+#include "KdTreeBaseMap.h"
 #include "terminal.h"
+#include "BlocksBaseMap.h"
 using namespace std;
 int main(int argc, char const *argv[]) {
     string name1("../实验数据/jz001.txt"),name2("../实验数据/jz002.txt"),name3("../实验数据/wz001.txt"),name4("../实验数据/yd001.txt");
     char cmd[20];
-    BaseStationMap *map = new BaseStationMap(name1);
+    BaseStationMap *map = new BaseStationMap(name1);//town=62,village=23,fastRoad=7
     map->readfile(name2);
     System *tem = new System(name4);
     tem->addFake(name3);
+    BlocksBaseMap *map2 = new BlocksBaseMap;
+    map2->readfile(name1);
+    map2->readfile(name2);
     /*
      * 可以使用的命令
      * loadMap/lm [filename]                                    加载系统构建地图，未输入则默认为jz001.txt
      * addMap/am [filename]                                     向现有地图中添加文件
      * loadSystem/ls [filename]                                 加载系统文件构建系统，未输入则默认为yd001.txt
      * loadFake/lf [filename]                                   加载伪基站文件构建系统，未输入则默认为wz001.txt
+     * blockDisplay/bs [Xi][Yi]                                 显示某个区块及其中的点，通过Xi和Yi来指定区块
      * find/f [XPoint] [YPoint] [n] [class]                     在地图中寻找离输入的坐标最近的点，n表示搜索点的个数，class表示搜索点的类型
      * test/t [XPoint] [YPoint]                                 对地图上某个点进行实验，看是否有信号
      * rangeFind/rf [X1Point] [Y1Point] [X2Point] [Y2Point]     寻找矩形范围内的点
@@ -24,6 +29,7 @@ int main(int argc, char const *argv[]) {
         * all/a                                                 显示所有叶节点
         * back/b                                                退出当前对树的访问
      * run/r [degree]                                           根据地图和系统，计算终端通过的轨迹上连接的基站序列，degree为当前计算的精度
+     * blockRun/bkr [degree]                                    根据分块法计算终端通过轨迹上连接的基站序列，degree为精度，计算精确度及效率均不如k-d树法
      * betterRun/br                                             根据地图和系统，精确计算连接的基站的时间,以及路径上连接的伪基站
      * exit                                                     退出
      */
@@ -53,6 +59,13 @@ int main(int argc, char const *argv[]) {
             tem->addFake(filename);
             cout<<"已添加伪基站"<<endl;
             //tem->includeFake(*map,1000);
+        }else if(strcmp(cmd,"blockDisplay") ==0 || strcmp(cmd,"bs") ==0){
+            int Xi,Yi;
+            cout<<"请输入区块X编号和Y编号（以空格隔开）"<<endl;
+            cout<<"且XY均小于"<<map2->size<<endl;
+                cin>>Xi>>Yi;
+            map2->blockDisplay(Xi,Yi);
+            cout<<endl;
         }else if (strcmp(cmd,"find") == 0 || strcmp(cmd,"f") == 0){
             double X,Y;
             int n,Class;
@@ -165,8 +178,13 @@ int main(int argc, char const *argv[]) {
             cout<<"请输入本次运行的精度"<<endl;
             cin>>degree;
             tem->run(*map,degree);
+        }else if (strcmp(cmd,"blockRun") == 0 || strcmp(cmd,"bkr") == 0) {
+            int degree;
+            cout<<"请输入本次运行的精度"<<endl;
+            cin>>degree;
+            tem->run(*map2,degree);
         } else if (strcmp(cmd,"betterRun") == 0 || strcmp(cmd,"br") == 0) {
-            tem->betterRun(*map, 10000);
+            tem->betterRun(*map, 1000);
         } else if (strcmp(cmd,"exit") == 0) {
                 cout<<"程序已退出"<<endl;
                 break;

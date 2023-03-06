@@ -4,7 +4,7 @@
 
 #ifndef BASE_STATION_FAKE_BASE_H
 #define BASE_STATION_FAKE_BASE_H
-#include "BaseMap.h"
+#include "KdTreeBaseMap.h"
 #include "myTime.h"
 
 class fakeBase {

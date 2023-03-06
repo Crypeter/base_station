@@ -1,12 +1,14 @@
 //
 // Created by 张飞扬 on 2023/1/13.
 //
-#ifndef BASE_STATION_BASEMAP_H
-#define BASE_STATION_BASEMAP_H
+#ifndef BASE_STATION_KD_TREE_BASEMAP_H
+#define BASE_STATION_KD_TREE_BASEMAP_H
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <stdio.h>
+#include <thread>
+#include <future>
 #include <cmath>
 #include <set>
 #define MaxStore 100
@@ -27,6 +29,7 @@ public:
     void show();//显示该节点内的信息
     bool operator < (const Node &) const;
 };
+Node* nearest(Node *now,double XPoint,double YPoint,Node *best);//寻找最近节点的辅助方法,方便多线程调用
 class LinkNode{
 public:
     Node *value;//存储节点信息
@@ -50,6 +53,7 @@ class KDTree{
 private:
     Node *root;
     void ShowLeave(Node *now);
+    int getDepth(Node *now);
     void put(Node *now,double XPoint, double YPoint, int range, double power, int number);//向树中加入节点的辅助方法
     Node* nearest(Node *now,double XPoint,double YPoint,Node *best);//寻找最近节点的辅助方法
     void nearestN(Node *now,double XPoint,double YPoint,Deque& best);//寻找n个节点的辅助方法 结果存储在best这个队列中
@@ -58,6 +62,7 @@ public:
     KDTree(){root = NULL;};
     Node *getRoot();
     void showAllLeave();
+    int GetDepth();
     void put(double XPoint,double YPoint,int range,double power,int number);//向树中加入节点
     Node* NearPointSearch(double  XPoint,double YPoint);//寻找一个节点的最近节点
     Deque NearNPointSearch(double  XPoint,double YPoint,int n);//寻找最近的n个节点
@@ -77,4 +82,4 @@ public:
     Deque NBaseStationSearch(double  XPoint,double YPoint,int n,string name);//寻找某个种类的n个基站
     Deque RangeSearch(double XPoint1,double YPoint1,double XPoint2,double YPoint2,int &number);//搜索矩形范围内的基站,number存储返回的个数
 };
-#endif //BASE_STATION_BASEMAP_H
+#endif //BASE_STATION_KD_TREE_BASEMAP_H

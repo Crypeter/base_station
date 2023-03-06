@@ -2,9 +2,48 @@
 // Created by 张飞扬 on 2023/1/13.
 //
 
-#include "BaseMap.h"
+#include "KdTreeBaseMap.h"
 double distance(double x1,double y1,double x2,double y2){
     return pow(x1-x2,2)+pow(y1-y2,2);
+}
+
+Node *nearest(Node *now, double XPoint, double YPoint, Node *best) {
+    Node *goodSide,*badSide;
+    if(now == NULL)return best;
+    if(distance(now->XPoint,now->YPoint,XPoint,YPoint) < distance(best->XPoint,best->YPoint,XPoint,YPoint))
+        best = now;
+    if(now->vector == 0){
+        if(XPoint < now->XPoint){
+            goodSide = now->lChild;
+            badSide = now->rChild;
+        }
+        else{
+            goodSide = now->rChild;
+            badSide = now->lChild;
+        }
+    }
+    else{
+        if(YPoint < now->YPoint){
+            goodSide = now->lChild;
+            badSide = now->rChild;
+        }
+        else{
+            goodSide = now->rChild;
+            badSide = now->lChild;
+        }
+    }
+    best = nearest(goodSide,XPoint,YPoint,best);
+    if(now->vector == 0){
+        if(distance(best->XPoint,best->YPoint,XPoint,YPoint) > abs(now->XPoint-XPoint)){
+            best = nearest(badSide,XPoint,YPoint,best);
+        }
+    }
+    else{
+        if(distance(best->XPoint,best->YPoint,XPoint,YPoint) >abs(now->YPoint-YPoint)){
+            best = nearest(badSide,XPoint,YPoint,best);
+        }
+    }
+    return best;
 }
 
 Node::Node(double XPoint, double YPoint, int range, double power, int number, int vector,Node* father) {
@@ -269,6 +308,23 @@ void KDTree::ShowLeave(Node *now) {
     }
 }
 
+int KDTree::getDepth(Node *now) {
+    int lDepth=0,rDepth = 0;
+    if(now->lChild == NULL && now->rChild == NULL)return 1;
+    if(now->lChild != NULL){
+        lDepth = getDepth(now->lChild)+1;
+    }
+    if(now->rChild != NULL){
+        rDepth = getDepth(now->rChild)+1;
+    }
+    if(lDepth >= rDepth)return lDepth;
+    else return rDepth;
+}
+
+int KDTree::GetDepth() {
+    return getDepth(root);
+}
+
 BaseStationMap::BaseStationMap(std::string filename) {
     ifstream file_jz001;
     this->town = new KDTree();
@@ -321,7 +377,7 @@ void BaseStationMap::readfile(std::string filename) {
     int number;//存储编号
     while(getline(file_jz001,buf))
     {
-        sscanf(buf.c_str(),"%lf,%lf,%s %lf,%d",&XPoint,&YPoint,space,&power,&number);
+        sscanf(buf.c_str(),"%lf,%lf,%s  %lf,%d",&XPoint,&YPoint,space,&power,&number);
         if(XPoint == -1 && YPoint == -1)break;
         put(XPoint,YPoint,space,power,number);
        // cout<<XPoint<<","<<YPoint<<","<<space<<","<<power<<","<<number<<endl;
@@ -335,9 +391,15 @@ void BaseStationMap::put(double XPoint, double YPoint, char *space, double power
 }
 
 Node *BaseStationMap::BaseStationSearch(double XPoint, double YPoint) {
-    Node *t = town->NearPointSearch(XPoint,YPoint);
-    Node *v = village->NearPointSearch(XPoint,YPoint);
-    Node *f = fastRoad->NearPointSearch(XPoint,YPoint);
+//    future<Node *>t1 = async(nearest,town->getRoot(),XPoint,YPoint,town->getRoot());
+//    future<Node *>v1 = async(nearest,village->getRoot(),XPoint,YPoint,village->getRoot());
+//    future<Node *>f1 = async(nearest,fastRoad->getRoot(),XPoint,YPoint,fastRoad->getRoot());
+//    Node *t = t1.get();
+//    Node *v = v1.get();
+//    Node *f = f1.get();
+    Node *t=town->NearPointSearch(XPoint,YPoint);
+    Node *v=village->NearPointSearch(XPoint,YPoint);
+    Node *f=fastRoad->NearPointSearch(XPoint,YPoint);
     double distanceT=0,distanceV=0,distanceF=0,powerT=0,powerV=0,powerF=0;
     if(t != NULL){
         distanceT = pow(XPoint-t->XPoint,2)+ pow(YPoint-t->YPoint,2);

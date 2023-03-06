@@ -3,7 +3,8 @@
 //
 
 #include "terminal.h"
-#define 精度 100
+#include "time.h"
+#define 精度 1000
 int checkEqual(Node *a,Node *b){
     if(a == NULL && b == NULL){
         return 1;//a和b都未连接到信号
@@ -50,7 +51,7 @@ void terminal::change(double StartXPoint, double StartYPoint, double EndXPoint, 
     now.change(hour,minute,0);
 }
 
-Node* terminal::connectTick(BaseStationMap map) {
+Node* terminal::connectTick(BaseStationMap &map) {
     Node *p=map.BaseStationSearch(StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place),StartYPoint+(EndYPoint-StartYPoint)/MaxTick*place);
     place++;
     double length,time;
@@ -70,7 +71,7 @@ void terminal::change(int tick) {
 terminal::terminal():StartXPoint(0),StartYPoint(0),EndXPoint(0),EndYPoint(0),Speed(0),now(0,0,0),Start(0,0,0),MaxTick(精度),place(0){
 }
 
-Node *terminal::lastTick(BaseStationMap map) {
+Node *terminal::lastTick(BaseStationMap &map) {
     if(place == 0 ||place == 1)return map.BaseStationSearch(StartXPoint,StartYPoint);
     else return map.BaseStationSearch(StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place-2),StartYPoint+(EndYPoint-StartYPoint)/MaxTick*(place-2));
 }
@@ -92,6 +93,16 @@ void terminal::display() {
     last.change(last.hour,last.minute,last.second-time);
     last.show();
     cout<<"位于("<<StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place-1)<<","<<StartYPoint+(EndYPoint-StartYPoint)/MaxTick*(place-1)<<")处"<<endl;
+}
+
+BNode *terminal::connectTick(BlocksBaseMap &map) {
+    BNode *p=map.bestFind(StartXPoint+(EndXPoint-StartXPoint)/MaxTick*(place),StartYPoint+(EndYPoint-StartYPoint)/MaxTick*place);
+    place++;
+    double length,time;
+    length = sqrt(distance(StartXPoint,StartYPoint,EndXPoint,EndYPoint))/MaxTick;
+    time = length/Speed/1000.0*60.0*60.0;
+    now.change(now.hour,now.minute,now.second+time);
+    return p;
 }
 
 
@@ -143,6 +154,7 @@ void System::printAll() {
     }
 }
 void System::run(BaseStationMap &map,int degree) {
+    clock_t start = clock();
     for(int i = 0;i<number;i++){
         group[i].place = 0;
         group[i].now.copy(group[i].Start);
@@ -197,6 +209,8 @@ void System::run(BaseStationMap &map,int degree) {
     cout<<"连接到"<<fastRoad<<"个高速基站"<<endl;
     cout<<"共连接到"<<town+village+fastRoad<<"个基站"<<endl;
     cout<<endl;
+    clock_t end = clock();
+    cout<<"用时"<<(end-start)/1.0/CLOCKS_PER_SEC<<"s"<<endl;
 }
 
 void System:: betterRun(BaseStationMap &map, int degree) {
@@ -306,6 +320,66 @@ void System::includeFake(BaseStationMap &map, int degree) {
 
 void System::addFake(string filename) {
     map = new fakeBaseMap(filename);
+}
+
+void System::run(BlocksBaseMap &map, int degree) {
+    clock_t start = clock();
+    for(int i = 0;i<number;i++){
+        group[i].place = 0;
+        group[i].now.copy(group[i].Start);
+    }
+    int town(0),village(0),fastRoad(0);
+    for(int i=0;i<number;i++){
+        cout<<"第"<<i+1<<"段终端的情况"<<endl;
+        if(degree >0){
+            group[i].MaxTick = degree;
+        }
+        set<BNode> townCollection,villageCollection,fastRoadCollection;
+        for(int j=0;j<group[i].MaxTick;j++){
+            BNode *p=group[i].connectTick(map);
+            if(p!= NULL){
+                if(p->range == 300){
+                    townCollection.insert(*p);
+                }
+                if(p->range == 1000){
+                    villageCollection.insert(*p);
+                }
+                if(p->range == 5000){
+                    fastRoadCollection.insert(*p);
+                }
+            }
+        }
+        set<BNode>::iterator it;
+        town += townCollection.size();
+        village += villageCollection.size();
+        fastRoad += fastRoadCollection.size();
+        cout<<"连接到"<<townCollection.size()<<"个城市基站"<<endl<<"编号为";
+        for(it = townCollection.begin();it != townCollection.end();it++){
+            cout<<it->number<<",";
+        }
+        cout<<endl;
+        cout<<"连接到"<<villageCollection.size()<<"个乡镇基站"<<endl<<"编号为";
+        for(it = villageCollection.begin();it != villageCollection.end();it++){
+            cout<<it->number<<",";
+        }
+        cout<<endl;
+        cout<<"连接到"<<fastRoadCollection.size()<<"个高速基站"<<endl<<"编号为";
+        for(it = fastRoadCollection.begin();it != fastRoadCollection.end();it++){
+            cout<<it->number<<",";
+        }
+        cout<<endl;
+        cout<<"共连接到"<<townCollection.size()+villageCollection.size()+fastRoadCollection.size()<<"个基站"<<endl;
+        townCollection.clear();
+        villageCollection.clear();
+        fastRoadCollection.clear();
+    }
+    cout<<"连接到"<<town<<"个城市基站"<<endl;
+    cout<<"连接到"<<village<<"个乡镇基站"<<endl;
+    cout<<"连接到"<<fastRoad<<"个高速基站"<<endl;
+    cout<<"共连接到"<<town+village+fastRoad<<"个基站"<<endl;
+    cout<<endl;
+    clock_t end = clock();
+    cout<<"用时"<<(end-start)/1.0/CLOCKS_PER_SEC<<"s"<<endl;
 }
 
 
